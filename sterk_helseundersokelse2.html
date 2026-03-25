@@ -1,0 +1,2883 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Standard fysisk helseundersøkelse — Sterk Helse & Trening</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+<style>
+:root {
+  --bg: #0a0f1e;
+  --surface: #111827;
+  --surface2: #1a2436;
+  --border: #1e3050;
+  --accent: #00e5ff;
+  --accent2: #ff4d6d;
+  --accent3: #69ff47;
+  --accent4: #c77dff;
+  --accent5: #ffbe0b;
+  --sterk: #0d4f47;
+  --sterk-light: #1a7a6e;
+  --text: #e8f0fe;
+  --muted: #6b7fa3;
+  --card-glow: 0 0 30px rgba(0,229,255,0.05);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  min-height: 100vh;
+  padding: 0 0 80px;
+  padding-bottom: max(80px, env(safe-area-inset-bottom, 80px));
+  background-image:
+    radial-gradient(ellipse at 15% 5%, rgba(13,79,71,0.18) 0%, transparent 45%),
+    radial-gradient(ellipse at 85% 90%, rgba(0,229,255,0.04) 0%, transparent 50%);
+}
+.container { max-width: 760px; margin: 0 auto; padding: 0 20px; }
+
+/* ─── HEADER ─── */
+.site-header {
+  position: relative;
+  background: linear-gradient(160deg, rgba(13,79,71,0.55) 0%, rgba(10,15,30,0.95) 60%);
+  border-bottom: 1px solid rgba(13,79,71,0.6);
+  padding: 0;
+  margin-bottom: 40px;
+  overflow: hidden;
+}
+.site-header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 0% 50%, rgba(13,79,71,0.45) 0%, transparent 60%),
+    radial-gradient(ellipse at 100% 0%, rgba(0,229,255,0.04) 0%, transparent 50%);
+  pointer-events: none;
+}
+.site-header::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(13,79,71,0.8) 30%, rgba(0,229,255,0.3) 60%, transparent);
+}
+.header-inner {
+  position: relative;
+  max-width: 760px; margin: 0 auto; padding: 36px 20px 32px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 24px;
+}
+.header-left { display: flex; flex-direction: column; gap: 12px; }
+.logo-wrap { display: block; }
+.logo-svg {
+  height: 78px;
+  width: auto;
+  color: #1a9e8e;
+  opacity: 0.88;
+  transition: opacity 0.3s, color 0.3s;
+}
+.logo-svg:hover {
+  opacity: 1;
+  color: #22c4b0;
+}
+.logo-img { display: none; }
+.header-divider {
+  width: 48px; height: 2px;
+  background: linear-gradient(90deg, rgba(13,79,71,0.9), rgba(0,229,255,0.4));
+  border-radius: 1px;
+}
+.header-title-block { text-align: right; }
+.header-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: 0.22em; color: var(--sterk-light);
+  text-transform: uppercase; margin-bottom: 8px;
+}
+.header-title {
+  font-size: clamp(20px, 3.5vw, 30px);
+  font-weight: 800; letter-spacing: -0.03em; line-height: 1.1;
+}
+.header-title span { color: var(--accent); }
+.header-subtitle {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px; color: var(--muted);
+  letter-spacing: 0.08em; margin-top: 6px;
+}
+
+/* ─── SECTION LABELS ─── */
+.section-marker {
+  display: flex; align-items: center; gap: 12px; margin: 32px 0 16px;
+}
+.section-marker-line { flex: 1; height: 1px; background: var(--border); }
+.section-marker-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 4px;
+}
+.tag-patient { color: var(--muted); border: 1px solid var(--border); }
+.tag-egym { color: var(--sterk-light); border: 1px solid var(--sterk); background: rgba(13,79,71,0.15); }
+.tag-bruce, .tag-kondisjon { color: var(--accent4); border: 1px solid rgba(199,125,255,0.3); background: rgba(199,125,255,0.07); }
+.tag-summary { color: var(--accent5); border: 1px solid rgba(255,190,11,0.3); background: rgba(255,190,11,0.07); }
+.tag-export { color: var(--accent3); border: 1px solid rgba(105,255,71,0.3); background: rgba(105,255,71,0.07); }
+
+/* ─── CARDS ─── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px 28px;
+  margin-bottom: 14px;
+  box-shadow: var(--card-glow);
+}
+.card.egym-card { border-color: rgba(13,79,71,0.6); box-shadow: 0 0 30px rgba(13,79,71,0.12); }
+.card.bruce-card { border-color: rgba(199,125,255,0.2); box-shadow: 0 0 30px rgba(199,125,255,0.06); }
+.card.summary-card { border-color: rgba(255,190,11,0.2); box-shadow: 0 0 30px rgba(255,190,11,0.06); }
+.card-title {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 20px;
+}
+.ct-patient { color: var(--muted); }
+.ct-egym { color: var(--sterk-light); }
+.ct-bruce { color: var(--accent4); }
+.ct-summary { color: var(--accent5); }
+
+/* ─── FORMS ─── */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 7px; }
+.form-group.full { grid-column: 1 / -1; }
+label {
+  font-size: 11px; font-weight: 600; color: var(--muted);
+  letter-spacing: 0.07em; text-transform: uppercase;
+}
+input, select {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text);
+  font-family: 'DM Mono', monospace; font-size: 15px;
+  padding: 10px 13px; transition: border-color 0.2s; outline: none; width: 100%;
+  -webkit-appearance: none; appearance: none;
+}
+/* Restore native appearance for select on touch devices for reliable dropdowns */
+select {
+  -webkit-appearance: menulist;
+  appearance: menulist;
+  cursor: pointer;
+}
+input { -webkit-appearance: none; }
+input:focus, select:focus {
+  border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,229,255,0.08);
+}
+.egym-card input:focus, .egym-card select:focus {
+  border-color: var(--sterk-light); box-shadow: 0 0 0 3px rgba(13,79,71,0.2);
+}
+select option { background: var(--surface2); color: var(--text); }
+.input-with-unit { position: relative; }
+.input-with-unit input { padding-right: 42px; }
+.input-unit {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); pointer-events: none;
+}
+.auto-field input { color: var(--sterk-light); border-color: rgba(13,79,71,0.4); }
+.field-hint {
+  font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 2px;
+}
+
+/* ─── EGYM SUBSECTIONS ─── */
+.egym-sub {
+  border: 1px solid rgba(13,79,71,0.4); border-radius: 12px;
+  margin-bottom: 14px; overflow: hidden;
+}
+.egym-sub-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px; cursor: pointer; user-select: none;
+  background: rgba(13,79,71,0.1);
+  border-bottom: 1px solid rgba(13,79,71,0.3);
+  transition: background 0.15s;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.egym-sub-header:hover { background: rgba(13,79,71,0.2); }
+.sub-icon {
+  width: 26px; height: 26px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500;
+  background: rgba(13,79,71,0.4); color: var(--sterk-light); flex-shrink: 0;
+}
+.sub-title { font-size: 13px; font-weight: 700; flex: 1; color: var(--text); }
+.sub-bioage {
+  font-family: 'DM Mono', monospace; font-size: 12px;
+  color: var(--sterk-light); min-width: 60px; text-align: right;
+}
+.sub-chevron { font-size: 10px; color: var(--muted); transition: transform 0.2s; }
+.sub-chevron.open { transform: rotate(90deg); }
+.egym-sub-body { display: none; padding: 16px; }
+.egym-sub-body.open { display: block; }
+
+/* ─── BIOAGE ROW ─── */
+.bioage-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; background: rgba(13,79,71,0.12);
+  border: 1px solid rgba(13,79,71,0.3); border-radius: 8px; margin-top: 14px;
+}
+.bioage-label { font-size: 12px; font-weight: 600; color: var(--sterk-light); flex: 1; }
+.bioage-input { display: flex; align-items: center; gap: 6px; }
+.bioage-input input { width: 72px; text-align: center; }
+.bioage-unit { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
+
+/* ─── EGYM TOTAL ─── */
+.egym-total {
+  display: flex; align-items: center; gap: 16px;
+  padding: 16px 20px; margin-top: 8px;
+  background: rgba(13,79,71,0.2); border: 1px solid rgba(13,79,71,0.5);
+  border-radius: 10px;
+}
+.egym-total-label { font-size: 13px; font-weight: 700; color: var(--sterk-light); flex: 1; }
+.egym-total-val {
+  font-size: 32px; font-weight: 800; color: var(--sterk-light);
+  font-family: 'Syne', sans-serif; letter-spacing: -0.03em;
+}
+.egym-total-unit { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); }
+
+/* ─── BRUCE (inherited styles) ─── */
+.mode-toggle {
+  display: flex; gap: 0; margin-bottom: 20px;
+  background: var(--surface2); padding: 4px; border-radius: 14px; border: 1px solid var(--border);
+}
+.mode-btn {
+  flex: 1; padding: 13px 10px; border: none; border-radius: 10px;
+  background: transparent; color: var(--muted); font-family: 'Syne', sans-serif;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  transition: all 0.25s; letter-spacing: 0.01em; text-align: center; line-height: 1.2;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.mode-btn.active { background: var(--accent4); color: #000; }
+.mode-section { display: none; }
+.mode-section.show { display: block; }
+.protocol-toggle {
+  display: flex; gap: 6px; margin-bottom: 20px;
+  background: var(--surface2); padding: 6px; border-radius: 12px; border: 1px solid var(--border);
+}
+.toggle-btn {
+  flex: 1; padding: 11px 6px; border: none; border-radius: 8px;
+  background: transparent; color: var(--muted); font-family: 'Syne', sans-serif;
+  font-size: 11.5px; font-weight: 600; cursor: pointer;
+  transition: all 0.2s; letter-spacing: 0.01em; text-align: center; line-height: 1.2;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.toggle-btn.active { background: var(--accent4); color: #000; }
+.protocol-info {
+  display: none; font-family: 'DM Mono', monospace; font-size: 11px;
+  color: var(--muted); background: var(--surface2); border: 1px solid var(--border);
+  border-left: 3px solid var(--accent4); border-radius: 8px;
+  padding: 12px 16px; margin-bottom: 20px; line-height: 1.7;
+}
+.protocol-info.show { display: block; }
+.protocol-info strong { color: var(--accent4); }
+.time-row { display: flex; align-items: center; gap: 8px; }
+.time-row input { flex: 1; text-align: center; }
+.time-sep { color: var(--accent4); font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 700; }
+.time-labels { display: flex; gap: 8px; margin-top: 4px; }
+.time-labels span { flex: 1; text-align: center; font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; letter-spacing: 0.1em; }
+.submax-fields { display: none; }
+.submax-fields.show { display: contents; }
+.modified-fields { display: none; }
+.modified-fields.show { display: contents; }
+.modified-row { display: none; }
+.modified-row.show { display: table-row; }
+.modified-row td { font-size: 11px; color: rgba(199,125,255,0.7) !important; }
+.ramped-fields { display: none; }
+.ramped-fields.show { display: contents; }
+.calc-btn {
+  width: 100%; padding: 15px; background: var(--accent4); color: #000;
+  border: none; border-radius: 12px; font-family: 'Syne', sans-serif;
+  font-size: 14px; font-weight: 700; letter-spacing: 0.05em; cursor: pointer;
+  margin-top: 8px; transition: all 0.2s; text-transform: uppercase;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.calc-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.calc-btn:active { transform: translateY(0); }
+.result-card {
+  display: none; background: var(--surface); border: 1px solid rgba(199,125,255,0.25);
+  border-radius: 16px; padding: 24px 28px; margin-top: 14px;
+  animation: fadeIn 0.4s ease;
+}
+.result-card.show { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.result-main { display: flex; align-items: flex-end; gap: 12px; margin-bottom: 20px; }
+.vo2-value {
+  font-size: clamp(52px, 10vw, 76px); font-weight: 800; line-height: 1;
+  letter-spacing: -0.03em; color: var(--accent4);
+  text-shadow: 0 0 40px rgba(199,125,255,0.4); transition: color 0.3s;
+}
+.vo2-unit { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); padding-bottom: 10px; line-height: 1.4; }
+.result-meta { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.meta-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+.meta-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+.meta-value { font-size: 16px; font-weight: 700; }
+.classification { margin-top: 18px; padding: 14px; border-radius: 10px; border-left: 3px solid var(--accent3); background: rgba(105,255,71,0.05); transition: all 0.3s; }
+.class-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.class-value { font-size: 15px; font-weight: 700; color: var(--accent3); }
+.protocol-table { width: 100%; border-collapse: collapse; font-family: 'DM Mono', monospace; font-size: 12px; margin-top: 4px; }
+.protocol-table th { text-align: left; padding: 8px 10px; color: var(--muted); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+.protocol-table td { padding: 9px 10px; border-bottom: 1px solid rgba(30,48,80,0.5); color: var(--text); }
+.protocol-table tr:last-child td { border-bottom: none; }
+.protocol-table tr.highlight td { color: var(--accent4); font-weight: 500; }
+.protocol-table tr.highlight-ramped td { color: var(--accent4) !important; font-weight: 500; }
+.ramped-row { display: none; }
+.ramped-row.show { display: table-row; }
+.ramped-row td { font-size: 11px; color: rgba(199,125,255,0.7) !important; }
+.table-legend { display: none; gap: 16px; margin-top: 10px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
+.table-legend.show { display: flex; }
+.legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+.error-msg { color: var(--accent2); font-family: 'DM Mono', monospace; font-size: 12px; margin-top: 8px; display: none; }
+.error-msg.show { display: block; }
+
+/* ─── SAMMENDRAG ─── */
+.summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+.sum-tile {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px; text-align: center;
+}
+.sum-tile-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.sum-tile-val { font-size: 28px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+.sum-tile-unit { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 4px; }
+.sum-tile.highlight-tile { border-color: rgba(255,190,11,0.4); background: rgba(255,190,11,0.07); }
+.sum-tile.highlight-tile .sum-tile-val { color: var(--accent5); text-shadow: 0 0 24px rgba(255,190,11,0.3); }
+.delta-row {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 14px 20px; background: rgba(255,190,11,0.08);
+  border: 1px solid rgba(255,190,11,0.25); border-radius: 10px; margin-bottom: 14px;
+}
+.delta-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
+.delta-val { font-size: 20px; font-weight: 800; }
+.delta-val.younger { color: var(--accent3); }
+.delta-val.older { color: var(--accent2); }
+.delta-val.same { color: var(--accent); }
+.comment-area {
+  width: 100%; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text); font-family: 'DM Mono', monospace;
+  font-size: 13px; padding: 12px; resize: vertical; outline: none;
+  transition: border-color 0.2s; min-height: 80px;
+}
+.comment-area:focus { border-color: var(--accent5); }
+
+/* ─── EXPORT ─── */
+.export-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+.export-btn {
+  flex: 1; min-width: 140px; padding: 13px 18px;
+  border: 1px solid var(--border); border-radius: 10px;
+  background: var(--surface2); color: var(--text);
+  font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all 0.18s; text-align: center;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.export-btn:hover { background: var(--surface); border-color: var(--muted); }
+.export-btn.primary {
+  background: var(--accent3); color: #000; border-color: var(--accent3);
+}
+.export-btn.primary:hover { opacity: 0.88; }
+.export-btn.email-btn {
+  background: rgba(0,229,255,0.1); border-color: var(--accent); color: var(--accent);
+}
+.export-btn.email-btn:hover { background: rgba(0,229,255,0.18); }
+.export-preview {
+  display: none; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 18px;
+}
+.export-preview.show { display: block; }
+.export-preview pre {
+  font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted);
+  white-space: pre-wrap; word-break: break-word; line-height: 1.7; margin-bottom: 12px;
+}
+.status-toast {
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  color: var(--accent3); margin-top: 10px; min-height: 16px;
+}
+
+/* ─── EMAIL MODAL ─── */
+.modal-backdrop {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.75); z-index: 100;
+  align-items: center; justify-content: center;
+  padding: 20px;
+  padding-bottom: max(20px, env(safe-area-inset-bottom));
+  -webkit-overflow-scrolling: touch;
+  overflow-y: auto;
+}
+.modal-backdrop.open { display: flex; }
+.modal {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; padding: 28px; width: 100%; max-width: 460px;
+  animation: fadeIn 0.25s ease;
+  max-height: 90vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.modal h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+.modal p { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; margin-bottom: 20px; }
+.modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+.modal-actions .export-btn { flex: 1; }
+
+
+
+/* ─── STEP PROGRESS BAR ─── */
+.step-bar {
+  display: flex; align-items: center; gap: 0;
+  padding: 0 20px; margin-bottom: 28px; max-width: 760px; margin-left: auto; margin-right: auto;
+}
+.step-item {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  flex: 1; cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.step-circle {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--surface); color: var(--muted);
+  font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.25s; position: relative; z-index: 1;
+}
+.step-label {
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--muted); transition: color 0.25s;
+  text-align: center;
+}
+.step-line {
+  flex: 1; height: 1px; background: var(--border);
+  margin-top: -14px; transition: background 0.25s;
+}
+.step-item.active .step-circle {
+  border-color: var(--accent); background: rgba(0,229,255,0.12); color: var(--accent);
+  box-shadow: 0 0 12px rgba(0,229,255,0.25);
+}
+.step-item.active .step-label { color: var(--accent); }
+.step-item.done .step-circle {
+  border-color: var(--sterk-light); background: rgba(13,79,71,0.35); color: var(--sterk-light);
+}
+.step-item.done .step-label { color: var(--sterk-light); }
+.step-line.done { background: var(--sterk-light); }
+
+/* ─── THEME TOGGLE ─── */
+.theme-toggle-btn {
+  position: absolute; top: 20px; right: 20px;
+  background: rgba(13,79,71,0.25); border: 1px solid rgba(13,79,71,0.4);
+  border-radius: 20px; padding: 6px 12px;
+  font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em;
+  color: var(--sterk-light); cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; gap: 6px;
+}
+.theme-toggle-btn:hover { background: rgba(13,79,71,0.4); }
+body.light-theme {
+  --bg: #f4f6f0;
+  --surface: #ffffff;
+  --surface2: #eef0eb;
+  --border: #c8d4c0;
+  --text: #1a2418;
+  --muted: #5a6e55;
+  --card-glow: 0 0 20px rgba(13,79,71,0.06);
+  background-image:
+    radial-gradient(ellipse at 15% 5%, rgba(13,79,71,0.06) 0%, transparent 45%),
+    radial-gradient(ellipse at 85% 90%, rgba(13,79,71,0.04) 0%, transparent 50%);
+}
+body.light-theme .site-header {
+  background: linear-gradient(160deg, rgba(13,79,71,0.15) 0%, rgba(244,246,240,0.98) 60%);
+}
+body.light-theme .logo-wrap { display: block; }
+body.light-theme .logo-svg {
+  color: #0d4f47;
+  opacity: 0.85;
+}
+body.light-theme .logo-svg:hover {
+  color: #0d4f47;
+  opacity: 1;
+}
+body.light-theme input, body.light-theme select, body.light-theme textarea {
+  background: #f9faf7; border-color: #c8d4c0; color: #1a2418;
+}
+body.light-theme .egym-sub-header { background: rgba(13,79,71,0.05); }
+body.light-theme .egym-sub-header:hover { background: rgba(13,79,71,0.1); }
+
+/* ─── VALIDATION ─── */
+.field-required { position: relative; }
+.field-required.invalid input,
+.field-required.invalid select {
+  border-color: var(--accent2) !important;
+  box-shadow: 0 0 0 2px rgba(255,77,109,0.15) !important;
+}
+.field-required.invalid label::after {
+  content: ' — påkrevd';
+  color: var(--accent2); font-weight: 400; text-transform: none; letter-spacing: 0;
+}
+.validate-banner {
+  display: none; background: rgba(255,77,109,0.1); border: 1px solid rgba(255,77,109,0.3);
+  border-radius: 8px; padding: 10px 14px; margin-bottom: 14px;
+  font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent2);
+}
+.validate-banner.show { display: block; }
+
+/* ─── LAST TEST BADGE ─── */
+.last-test-row {
+  display: flex; align-items: center; gap: 10px; margin-top: 10px;
+  padding: 10px 14px; background: rgba(0,229,255,0.05);
+  border: 1px solid rgba(0,229,255,0.15); border-radius: 8px;
+}
+.last-test-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); flex: 1; }
+.last-test-val { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--accent); }
+.last-test-days { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
+
+/* ─── TRAFFIC LIGHTS ─── */
+.ref-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  padding: 2px 8px; border-radius: 10px; margin-left: 6px;
+  font-weight: 500; vertical-align: middle; white-space: nowrap;
+}
+.ref-green  { background: rgba(105,255,71,0.15);  color: #69ff47; border: 1px solid rgba(105,255,71,0.3); }
+.ref-yellow { background: rgba(255,190,11,0.15);  color: #ffbe0b; border: 1px solid rgba(255,190,11,0.3); }
+.ref-red    { background: rgba(255,77,109,0.15);   color: #ff4d6d; border: 1px solid rgba(255,77,109,0.3); }
+.ref-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.ref-green  .ref-dot { background: #69ff47; }
+.ref-yellow .ref-dot { background: #ffbe0b; }
+.ref-red    .ref-dot { background: #ff4d6d; }
+.input-with-badge { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.input-with-badge .input-with-unit { flex: 1; min-width: 120px; }
+.badge-slot { min-width: 90px; }
+
+/* ─── SYNC INDICATOR ─── */
+.sync-notice {
+  display: none; align-items: center; gap: 8px;
+  padding: 8px 14px; margin-bottom: 14px;
+  background: rgba(0,229,255,0.07); border: 1px solid rgba(0,229,255,0.2);
+  border-radius: 8px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent);
+}
+.sync-notice.show { display: flex; }
+
+/* ─── HISTORY PANEL ─── */
+.history-section {
+  margin-top: 28px; border-top: 1px solid var(--border); padding-top: 20px;
+}
+.history-header {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;
+}
+.history-title {
+  font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--accent);
+}
+.history-clear {
+  font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted);
+  background: none; border: 1px solid var(--border); border-radius: 4px;
+  padding: 3px 8px; cursor: pointer; transition: all 0.15s;
+}
+.history-clear:hover { border-color: var(--accent2); color: var(--accent2); }
+.history-empty {
+  font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted);
+  text-align: center; padding: 16px 0;
+}
+.history-table {
+  width: 100%; border-collapse: collapse;
+  font-family: 'DM Mono', monospace; font-size: 11px;
+}
+.history-table th {
+  text-align: left; padding: 6px 10px; color: var(--muted);
+  font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+}
+.history-table td {
+  padding: 9px 10px; border-bottom: 1px solid rgba(30,48,80,0.4);
+  color: var(--text); vertical-align: middle;
+}
+.history-table tr:last-child td { border-bottom: none; }
+.history-table tr:hover td { background: rgba(0,229,255,0.03); }
+.hist-delta-pos { color: #69ff47; }
+.hist-delta-neg { color: #ff4d6d; }
+.hist-delta-neu { color: var(--muted); }
+.hist-load-btn {
+  font-family: 'DM Mono', monospace; font-size: 9px; color: var(--accent);
+  background: none; border: 1px solid rgba(0,229,255,0.25); border-radius: 4px;
+  padding: 2px 7px; cursor: pointer; transition: all 0.15s;
+}
+.hist-load-btn:hover { background: rgba(0,229,255,0.1); }
+@media print {
+  body { background: #fff !important; color: #111 !important; padding: 0; font-size: 11pt; }
+  .site-header { background: #fff !important; border-bottom: 2pt solid #0d4f47 !important; }
+  .logo-svg { color: #0d4f47 !important; opacity: 1 !important; height: 56px !important; }
+  .logo-img { display: none !important; }
+  .header-title { color: #0d4f47 !important; font-size: 18pt !important; }
+  .header-title span { color: #0d4f47 !important; }
+  .header-eyebrow, .header-subtitle { color: #555 !important; }
+  .step-bar, .theme-toggle-btn, .export-actions .no-print, .export-actions .email-btn,
+  .status-toast, .modal-backdrop, .egym-sub-header .sub-chevron,
+  .calc-btn, .protocol-toggle, .protocol-info { display: none !important; }
+  .card, .egym-sub, .result-card { box-shadow: none !important; border: 0.5pt solid #ccc !important; break-inside: avoid; }
+  .egym-sub-body { display: block !important; }
+  .section-marker-tag { border: 0.5pt solid #ccc !important; background: #f5f5f5 !important; color: #333 !important; }
+  input, select, textarea { border: 0.5pt solid #ccc !important; background: #fff !important; color: #111 !important; }
+  .result-card.show { display: block !important; }
+  .sum-tile { border: 0.5pt solid #ccc !important; background: #fafafa !important; }
+  .sum-tile-val { color: #0d4f47 !important; text-shadow: none !important; }
+  .vo2-value { color: #0d4f47 !important; text-shadow: none !important; }
+  .egym-total { background: #f0f5f0 !important; border: 0.5pt solid #0d4f47 !important; }
+  .egym-total-val { color: #0d4f47 !important; }
+  .delta-row { background: #f9f9f0 !important; border: 0.5pt solid #ccc !important; }
+  .validate-banner { display: none !important; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+
+
+
+.back-link{
+  display:inline-flex; align-items:center; gap:7px;
+  font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.18em;
+  text-transform:uppercase; color:var(--muted); text-decoration:none;
+  padding:6px 12px; border:1px solid var(--border); border-radius:6px;
+  background:rgba(30,48,80,0.3); transition:all 0.2s;
+}
+.back-link:hover{ color:var(--accent); border-color:rgba(0,229,255,0.35); background:rgba(0,229,255,0.06); }
+.back-link svg { width:12px; height:12px; flex-shrink:0; }
+
+/* ─── iPAD / TABLET RESPONSIVE ─── */
+@media (max-width: 520px) {
+  .form-grid, .form-grid-3 { grid-template-columns: 1fr; }
+  .result-meta { grid-template-columns: 1fr 1fr; }
+  .summary-grid { grid-template-columns: 1fr 1fr; }
+  .header-inner { grid-template-columns: 1fr; gap: 16px; }
+  .header-title-block { text-align: left; }
+  .logo-svg { height: 62px; }
+  .step-bar { gap: 6px; }
+  .step-label { display: none; }
+}
+
+/* Prevent iOS auto-zoom (requires font-size >= 16px on focused inputs) */
+@media (max-width: 1024px) {
+  input, select, textarea { font-size: 16px !important; }
+}
+
+/* iPad portrait: wrap protocol toggle */
+@media (max-width: 820px) {
+  .protocol-toggle { flex-wrap: wrap; }
+  .toggle-btn { flex: 1 1 calc(50% - 6px); }
+  .export-actions { flex-direction: column; }
+  .export-btn { min-width: unset; }
+}
+
+/* ─── iOS / iPadOS TOUCH & SELECT FIXES ─── */
+@supports (-webkit-touch-callout: none) {
+  body { -webkit-overflow-scrolling: touch; }
+  /* Force native select dropdowns on iOS/iPadOS for reliable popup behavior */
+  select {
+    -webkit-appearance: menulist !important;
+    appearance: menulist !important;
+    background-image: none !important;
+    padding-right: 13px !important;
+    min-height: 44px;
+  }
+  /* Prevent iOS zoom on focus — ensure 16px+ */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+  /* Fix date inputs on iOS */
+  input[type="date"] {
+    -webkit-appearance: none;
+    min-height: 44px;
+    line-height: 1.2;
+  }
+  /* Smooth momentum scrolling for overflow areas */
+  .history-scroll-wrap {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* ─── GLOBAL TOUCH TARGET MINIMUMS (Apple HIG: 44px) ─── */
+@media (pointer: coarse) {
+  input, select, textarea {
+    min-height: 44px;
+    font-size: 16px !important;
+  }
+  select {
+    -webkit-appearance: menulist !important;
+    appearance: menulist !important;
+    background-color: var(--surface2);
+    color: var(--text);
+    min-height: 48px;
+    padding: 10px 13px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  button, .toggle-btn, .export-btn, .calc-btn,
+  .egym-sub-header, .hist-load-btn, .history-clear,
+  .back-link, .theme-toggle-btn, .step-item {
+    min-height: 44px;
+  }
+  .toggle-btn {
+    padding: 14px 10px;
+    font-size: 13px;
+  }
+  .calc-btn {
+    padding: 18px;
+    font-size: 15px;
+    min-height: 52px;
+  }
+  .export-btn {
+    padding: 16px 18px;
+    font-size: 14px;
+    min-height: 52px;
+  }
+  .egym-sub-header {
+    min-height: 56px;
+    padding: 14px 16px;
+    gap: 12px;
+  }
+  .sub-chevron {
+    font-size: 14px;
+    padding: 8px;
+  }
+  .hist-load-btn {
+    padding: 10px 16px;
+    font-size: 12px;
+  }
+  .history-clear {
+    padding: 10px 16px;
+    font-size: 11px;
+  }
+  .theme-toggle-btn {
+    padding: 10px 16px;
+    font-size: 11px;
+    min-height: 44px;
+  }
+  .bioage-input input {
+    min-height: 44px;
+    width: 80px;
+  }
+  /* Larger labels for readability on touch */
+  label {
+    font-size: 12px;
+    padding-bottom: 2px;
+  }
+  /* Ensure form groups have adequate spacing */
+  .form-grid, .form-grid-3 {
+    gap: 16px;
+  }
+  /* Step bar touch targets */
+  .step-circle {
+    width: 34px;
+    height: 34px;
+    font-size: 11px;
+  }
+}
+
+/* ─── iPAD PORTRAIT (~768px–820px) ─── */
+@media (min-width: 521px) and (max-width: 820px) {
+  .container { padding: 0 24px; }
+  .form-grid { grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-grid-3 { grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-grid-3 .form-group:last-child {
+    grid-column: 1 / -1;
+  }
+  .result-meta { grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .summary-grid { grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .protocol-toggle {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .toggle-btn {
+    flex: 1 1 calc(50% - 8px);
+    min-height: 48px;
+  }
+  /* Let 3rd toggle button span full width if wrapped */
+  .toggle-btn:last-child:nth-child(odd) {
+    flex: 1 1 100%;
+  }
+  .export-actions {
+    flex-direction: column;
+  }
+  .export-btn {
+    min-width: unset;
+    width: 100%;
+  }
+  /* History table horizontal scroll */
+  .history-scroll-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -4px;
+    padding: 0 4px;
+  }
+  .history-table {
+    min-width: 680px;
+  }
+  .card {
+    padding: 22px 24px;
+  }
+}
+
+/* ─── iPAD LANDSCAPE (~1024px) ─── */
+@media (min-width: 821px) and (max-width: 1100px) {
+  .container { max-width: 800px; padding: 0 28px; }
+  .form-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .summary-grid { grid-template-columns: repeat(3, 1fr); }
+  .protocol-toggle { flex-wrap: nowrap; }
+  .toggle-btn { flex: 1; min-height: 48px; }
+  .export-actions { flex-wrap: wrap; }
+  .export-btn { flex: 1 1 calc(50% - 8px); min-width: unset; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- ─── SAFARI DETECTION BANNER ─── -->
+<div id="safari-banner" style="display:none;position:fixed;inset:0;z-index:9999;background:var(--bg,#0a0f1e);color:#e8f0fe;font-family:'Syne',system-ui,sans-serif;padding:0;margin:0;overflow-y:auto;-webkit-overflow-scrolling:touch;">
+  <div style="max-width:480px;margin:0 auto;padding:40px 28px 60px;text-align:center;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;">
+    <!-- Logo/icon -->
+    <div style="width:72px;height:72px;border-radius:18px;background:linear-gradient(135deg,rgba(13,79,71,0.6),rgba(0,229,255,0.15));display:flex;align-items:center;justify-content:center;border:1px solid rgba(13,79,71,0.5);">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#1a9e8e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+    </div>
+
+    <h1 style="font-size:22px;font-weight:800;line-height:1.2;letter-spacing:-0.02em;margin:0;">
+      Denne filen må åpnes<br>i <span style="color:#00e5ff">Safari</span>
+    </h1>
+
+    <p style="font-size:14px;color:#6b7fa3;line-height:1.6;max-width:340px;margin:0;">
+      Skjemaet bruker funksjoner som krever en fullverdig nettleser. Forhåndsviseren i Filer-appen støtter ikke dette.
+    </p>
+
+    <!-- Method 1: Direct open button -->
+    <button onclick="openInSafari()" style="
+      width:100%;max-width:320px;padding:16px 24px;
+      background:#00e5ff;color:#000;border:none;border-radius:14px;
+      font-family:'Syne',system-ui,sans-serif;font-size:16px;font-weight:700;
+      cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+      letter-spacing:0.02em;
+    ">
+      Åpne i Safari
+    </button>
+
+    <!-- Divider -->
+    <div style="display:flex;align-items:center;gap:12px;width:100%;max-width:320px;">
+      <div style="flex:1;height:1px;background:rgba(255,255,255,0.1)"></div>
+      <span style="font-family:'DM Mono',monospace;font-size:10px;color:#6b7fa3;letter-spacing:0.15em;text-transform:uppercase;">Alternativt</span>
+      <div style="flex:1;height:1px;background:rgba(255,255,255,0.1)"></div>
+    </div>
+
+    <!-- Method 2: Manual steps -->
+    <div style="text-align:left;width:100%;max-width:320px;background:rgba(17,24,39,0.8);border:1px solid rgba(30,48,80,0.6);border-radius:14px;padding:20px;">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:#6b7fa3;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:14px;">Manuell metode</div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+          <div style="min-width:26px;height:26px;border-radius:8px;background:rgba(13,79,71,0.4);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:11px;color:#1a9e8e;flex-shrink:0;">1</div>
+          <div style="font-size:13px;color:#e8f0fe;line-height:1.5;">Trykk på <strong style="color:#00e5ff">dele-knappen</strong> <span style="font-size:18px;vertical-align:middle;">&#xFE0E;⎋</span> (firkant med pil opp)</div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+          <div style="min-width:26px;height:26px;border-radius:8px;background:rgba(13,79,71,0.4);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:11px;color:#1a9e8e;flex-shrink:0;">2</div>
+          <div style="font-size:13px;color:#e8f0fe;line-height:1.5;">Velg <strong style="color:#00e5ff">«Åpne i Safari»</strong> fra listen</div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+          <div style="min-width:26px;height:26px;border-radius:8px;background:rgba(13,79,71,0.4);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:11px;color:#1a9e8e;flex-shrink:0;">3</div>
+          <div style="font-size:13px;color:#e8f0fe;line-height:1.5;">Skjemaet åpnes med <strong style="color:#1a9e8e">full funksjonalitet</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shortcut install -->
+    <div style="text-align:left;width:100%;max-width:320px;background:rgba(199,125,255,0.06);border:1px solid rgba(199,125,255,0.2);border-radius:14px;padding:20px;">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:#c77dff;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:10px;">Permanent løsning</div>
+      <p style="font-size:13px;color:#e8f0fe;line-height:1.5;margin:0 0 14px;">
+        Installer en iOS-snarvei som alltid åpner <code style="background:rgba(199,125,255,0.15);padding:2px 6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:11px;color:#c77dff;">.html</code>-filer i Safari:
+      </p>
+      <a id="shortcut-link" href="https://www.icloud.com/shortcuts/ba94beac45db4a2abaec03a28e14e48c" target="_blank" rel="noopener" style="
+        display:block;width:100%;padding:14px 20px;
+        background:rgba(199,125,255,0.15);border:1px solid rgba(199,125,255,0.3);border-radius:10px;
+        color:#c77dff;font-family:'Syne',system-ui,sans-serif;font-size:14px;font-weight:600;
+        text-decoration:none;text-align:center;touch-action:manipulation;
+      ">
+        Installer «Åpne i Safari»-snarvei
+      </a>
+      <p style="font-size:11px;color:#6b7fa3;line-height:1.5;margin:10px 0 0;font-family:'DM Mono',monospace;">
+        Etter installasjon: Åpne Filer → trykk og hold på .html-fil → «Del» → «Åpne i Safari»
+      </p>
+    </div>
+
+    <!-- Skip if actually in Safari -->
+    <button onclick="dismissBanner()" style="
+      background:none;border:none;color:#6b7fa3;
+      font-family:'DM Mono',monospace;font-size:11px;
+      cursor:pointer;padding:10px 20px;touch-action:manipulation;
+      text-decoration:underline;text-underline-offset:3px;
+    ">
+      Fungerer fint — vis skjemaet likevel
+    </button>
+  </div>
+</div>
+
+<script>
+(function() {
+  // Detect if we're NOT in a full Safari browser
+  // In-app browsers / file preview / WKWebView lack full Safari features
+  function isFullSafari() {
+    var ua = navigator.userAgent;
+    // Desktop — always fine
+    if (!/iPad|iPhone|iPod/.test(ua) && !/Macintosh.*Safari/.test(ua)) return true;
+    // If not iOS/iPadOS at all, it's fine
+    if (!/iPad|iPhone|iPod/.test(ua) && !/Macintosh/.test(ua)) return true;
+    // iPadOS 13+ reports as Macintosh — check touch
+    var isIPadOS = /Macintosh/.test(ua) && 'ontouchend' in document;
+    var isIOS = /iPad|iPhone|iPod/.test(ua);
+    if (!isIOS && !isIPadOS) return true;
+    // Check if standalone mode (added to home screen) — full capability
+    if (window.navigator.standalone) return true;
+    // In full Safari, window.safari exists or SafariViewController
+    // WKWebView used by Files/Quick Look lacks some features
+    // Check for the __safari_reader__ or indexedDB support
+    // Most reliable: full Safari supports window.safari or has specific behavior
+    // Files Quick Look typically has a very limited window size and no address bar
+    // Check: if localStorage works and we're in a known Safari-like env, probably OK
+    try {
+      localStorage.setItem('_safari_test', '1');
+      localStorage.removeItem('_safari_test');
+    } catch(e) {
+      // localStorage blocked — likely not full Safari
+      return false;
+    }
+    // If opened via file:// in Quick Look, document.URL starts with file:// but
+    // there's no navigation ability. We check for file:// protocol specifically.
+    // In Safari proper, file:// URLs still work, but Quick Look has limited JS.
+    // Heuristic: if using file:// and the screen is fully covered (no Safari chrome)
+    if (window.location.protocol === 'file:') {
+      // Check if we can access full Safari APIs
+      // Quick Look WKWebView doesn't support window.open reliably
+      // But we can't be 100% sure, so show the banner with dismiss option
+      return false;
+    }
+    return true;
+  }
+
+  if (!isFullSafari()) {
+    document.getElementById('safari-banner').style.display = 'block';
+  }
+})();
+
+function openInSafari() {
+  // Try x-callback-url to open in Safari
+  var currentURL = window.location.href;
+  // Method 1: Try the x-web-search or Safari URL scheme
+  // On iOS, we can try to use shortcuts URL scheme
+  var safariURL = 'x-safari-https://' + currentURL.replace(/^https?:\/\//, '');
+
+  // Method 2: For file:// URLs, we need a different approach
+  // Copy the file path and guide the user
+  if (window.location.protocol === 'file:') {
+    // Try opening via shortcut URL scheme
+    var shortcutURL = 'shortcuts://run-shortcut?name=Åpne%20i%20Safari&input=text&text=' + encodeURIComponent(currentURL);
+    window.location.href = shortcutURL;
+
+    // Fallback: if shortcut not installed, the URL scheme will fail silently
+    // Show the manual instructions after a delay
+    setTimeout(function() {
+      alert('Tips: Hvis snarveien ikke er installert ennå, bruk dele-knappen (⎋) og velg «Åpne i Safari» fra menyen.');
+    }, 1500);
+  } else {
+    // For http/https URLs, we can open in Safari directly
+    window.open(currentURL, '_blank');
+  }
+}
+
+function dismissBanner() {
+  document.getElementById('safari-banner').style.display = 'none';
+}
+</script>
+
+<header class="site-header">
+  <button class="theme-toggle-btn" onclick="toggleTheme()" id="theme-btn">☀ Lyst tema</button>
+  <div class="header-inner">
+    <div class="header-left">
+      <div class="logo-wrap"><svg class="logo-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="328 760 1340 520">
+<defs>
+<g id="glyph-0-0"><path d="M 9.796875 0 L 16.421875 0 L 16.421875 -30.8125 L 55.578125 -30.8125 L 55.578125 0 L 62.203125 0 L 62.203125 -67.484375 L 55.578125 -67.484375 L 55.578125 -36.765625 L 16.421875 -36.765625 L 16.421875 -67.484375 L 9.796875 -67.484375 Z"/></g>
+<g id="glyph-0-1"><path d="M 9.796875 0 L 49.53125 0 L 49.53125 -5.953125 L 16.421875 -5.953125 L 16.421875 -31.015625 L 42.046875 -31.015625 L 42.046875 -36.953125 L 16.421875 -36.953125 L 16.421875 -61.53125 L 47.8125 -61.53125 L 47.8125 -67.484375 L 9.796875 -67.484375 Z"/></g>
+<g id="glyph-0-2"><path d="M 9.796875 0 L 47.71875 0 L 47.71875 -5.953125 L 16.421875 -5.953125 L 16.421875 -67.484375 L 9.796875 -67.484375 Z"/></g>
+<g id="glyph-0-3"><path d="M 4.796875 -7.484375 C 4.796875 -7.484375 12.390625 1.15625 26.203125 1.15625 C 38.875 1.15625 46.65625 -7.015625 46.65625 -17.09375 C 46.65625 -39.265625 12.953125 -34.65625 12.953125 -50.6875 C 12.953125 -56.640625 18.53125 -62.296875 27.171875 -62.296875 C 36 -62.296875 41.953125 -56.546875 41.953125 -56.546875 L 45.21875 -62.109375 C 45.21875 -62.109375 38.875 -68.640625 27.171875 -68.640625 C 14.6875 -68.640625 6.140625 -60.1875 6.140625 -50.5 C 6.140625 -29.5625 39.84375 -33.890625 39.84375 -16.890625 C 39.84375 -9.59375 33.796875 -5.1875 26.40625 -5.1875 C 15.75 -5.1875 8.734375 -12.578125 8.734375 -12.578125 Z"/></g>
+<g id="glyph-0-4"></g>
+<g id="glyph-0-5"><path d="M 5.765625 -18.625 C 5.765625 -7.390625 14.96875 1.15625 28.515625 1.15625 C 42.046875 1.15625 50.875 -7.015625 50.875 -23.140625 L 50.875 -33.03125 L 60 -33.03125 L 60 -38.96875 L 50.875 -38.96875 L 50.875 -48.484375 L 44.25 -48.484375 L 44.25 -38.96875 L 30.046875 -38.96875 C 17.46875 -38.96875 15.546875 -46.65625 15.546875 -51.171875 C 15.546875 -58.46875 21.5 -62.78125 29.09375 -62.78125 C 31.484375 -62.78125 34.65625 -62.109375 34.65625 -62.109375 L 36.578125 -67.6875 C 36.578125 -67.6875 32.15625 -68.640625 28.890625 -68.640625 C 16.609375 -68.640625 8.640625 -61.921875 8.640625 -51.546875 C 8.640625 -39.546875 18.046875 -36.578125 18.046875 -36.578125 L 18.046875 -36.390625 C 10.171875 -33.984375 5.765625 -26.40625 5.765625 -18.625 Z M 12.578125 -19.015625 C 12.578125 -27.453125 18.34375 -33.03125 30.046875 -33.03125 L 44.25 -33.03125 L 44.25 -23.328125 C 44.25 -10.375 38.015625 -5.09375 28.515625 -5.09375 C 18.53125 -5.09375 12.578125 -11.328125 12.578125 -19.015625 Z"/></g>
+<g id="glyph-0-6"><path d="M 24.953125 0 L 31.578125 0 L 31.578125 -61.53125 L 55.78125 -61.53125 L 55.78125 -67.484375 L 0.671875 -67.484375 L 0.671875 -61.53125 L 24.953125 -61.53125 Z"/></g>
+<g id="glyph-0-7"><path d="M 9.796875 0 L 16.421875 0 L 16.421875 -28.421875 L 33.40625 -28.421875 L 48.671875 0 L 56.25 0 L 41.5625 -27.171875 C 40.515625 -28.984375 39.84375 -29.859375 39.84375 -29.859375 L 39.84375 -30.046875 C 47.421875 -32.15625 52.609375 -39.171875 52.609375 -48.28125 C 52.609375 -56.453125 48.765625 -62.875 42.4375 -65.65625 C 39.75 -66.8125 36.671875 -67.484375 29.765625 -67.484375 L 9.796875 -67.484375 Z M 16.421875 -34.375 L 16.421875 -61.53125 L 30.046875 -61.53125 C 35.234375 -61.53125 37.625 -60.953125 39.640625 -59.90625 C 43.578125 -57.796875 45.796875 -53.65625 45.796875 -48.09375 C 45.796875 -39.640625 40.609375 -34.375 32.453125 -34.375 Z"/></g>
+<g id="glyph-0-8"><path d="M 9.796875 0 L 16.421875 0 L 16.421875 -48.578125 C 16.421875 -52.125 15.84375 -57.703125 15.84375 -57.703125 L 16.03125 -57.703125 C 16.03125 -57.703125 19.296875 -51.9375 21.59375 -48.578125 L 56.0625 0 L 62.5 0 L 62.5 -67.484375 L 55.875 -67.484375 L 55.875 -18.90625 C 55.875 -15.359375 56.453125 -9.796875 56.453125 -9.796875 L 56.25 -9.796875 C 56.25 -9.796875 52.984375 -15.546875 50.6875 -18.90625 L 16.21875 -67.484375 L 9.796875 -67.484375 Z"/></g>
+<g id="glyph-0-9"><path d="M 9.796875 0 L 16.421875 0 L 16.421875 -67.484375 L 9.796875 -67.484375 Z"/></g>
+<g id="glyph-0-10"><path d="M 5.28125 -33.796875 C 5.28125 -13.734375 19.875 1.15625 38.296875 1.15625 C 52.515625 1.15625 60.28125 -7.96875 60.28125 -7.96875 L 60.484375 -7.96875 C 60.484375 -7.96875 60.390625 -6.53125 60.390625 -5.09375 L 60.390625 0 L 66.53125 0 L 66.53125 -32.25 L 48.671875 -32.25 L 48.671875 -26.296875 L 60.1875 -26.296875 L 60.1875 -14.875 C 60.1875 -14.875 52.125 -4.984375 38.96875 -4.984375 C 23.609375 -4.984375 12.1875 -17.28125 12.1875 -33.890625 C 12.1875 -49.921875 23.234375 -62.5 39.546875 -62.5 C 51.84375 -62.5 59.71875 -55.78125 59.71875 -55.78125 L 63.265625 -60.765625 C 63.265625 -60.765625 54.90625 -68.640625 39.265625 -68.640625 C 19.875 -68.640625 5.28125 -53.28125 5.28125 -33.796875 Z"/></g>
+</defs>
+
+<!-- STERK main letters - exact paths from original AI file -->
+<!-- Ʒ (mirrored E) -->
+<path fill="currentColor" d="M 581.183594 770.964844 L 1046.667969 770.976562 L 1046.683594 1089.417969 L 842.992188 1089.226562 L 843.019531 1022.921875 L 969.714844 1022.949219 L 969.710938 962.484375 L 873.957031 962.488281 L 873.960938 896.523438 L 969.714844 896.53125 L 969.710938 837.226562 L 581.480469 837.21875 L 581.183594 837.222656 Z"/>
+<!-- T vertical bar -->
+<path fill="currentColor" d="M 754.183594 1089.175781 L 678.382812 1089.210938 L 678.34375 836.484375 L 754.183594 836.484375 Z"/>
+<!-- K -->
+<path fill="currentColor" d="M 1386.589844 770.972656 L 1386.585938 1089.195312 L 1463.265625 1089.203125 L 1463.265625 960.109375 L 1495.367188 960.191406 L 1562.292969 1089.203125 L 1649.304688 1089.203125 L 1557.71875 923.570312 L 1644.160156 770.972656 L 1560.9375 770.972656 L 1495.445312 894.476562 L 1463.257812 894.203125 L 1463.390625 770.972656 Z"/>
+<!-- R -->
+<path fill="currentColor" d="M 1172.664062 837.765625 C 1172.566406 844.28125 1172.683594 851.066406 1172.636719 862.84375 C 1172.65625 884.601562 1172.597656 912.945312 1172.664062 915.011719 C 1172.714844 915.105469 1172.890625 915.148438 1173.261719 915.175781 C 1183.507812 915.355469 1193.933594 915.359375 1204.304688 915.394531 C 1217.246094 916.027344 1231.335938 912.832031 1239.652344 901.773438 C 1246.925781 892.59375 1246.730469 880.964844 1246.589844 869.925781 C 1246.488281 862.464844 1244.644531 856.175781 1240.96875 851.160156 C 1233.542969 841.023438 1220.859375 838.878906 1217.613281 838.320312 C 1214.082031 837.71875 1211.109375 837.691406 1209.128906 837.765625 Z M 1264.472656 1089.175781 L 1207.835938 981.578125 L 1172.265625 981.53125 L 1172.21875 1089.175781 L 1095.261719 1089.203125 L 1095.269531 770.96875 C 1166.839844 770.140625 1219.425781 770.316406 1233.828125 770.96875 C 1237.855469 771.152344 1244.449219 771.625 1252.503906 773.464844 C 1262.246094 775.691406 1269.242188 778.800781 1271.964844 780.070312 C 1275.734375 781.832031 1281.761719 784.691406 1288.570312 790.070312 C 1294.75 794.949219 1298.671875 799.613281 1301.425781 802.925781 C 1302.683594 804.441406 1306.386719 808.980469 1310.355469 815.511719 C 1312.625 819.253906 1315.179688 823.503906 1317.496094 829.527344 C 1319.308594 834.246094 1320.125 837.828125 1321.425781 843.546875 C 1322.09375 846.488281 1323.203125 851.429688 1324.011719 858.007812 C 1324.539062 862.28125 1325.246094 868.222656 1324.996094 876.042969 C 1324.722656 884.457031 1323.480469 890.785156 1322.671875 894.789062 C 1322.066406 897.816406 1321.085938 902.597656 1319.011719 908.714844 C 1316.605469 915.824219 1314.015625 920.910156 1313.210938 922.464844 C 1311.433594 925.882812 1309.15625 929.75 1306.246094 933.800781 C 1304.132812 936.753906 1301.214844 940.769531 1296.515625 945.230469 C 1293.339844 948.242188 1290.636719 950.226562 1288.929688 951.476562 C 1284.535156 954.6875 1280.539062 956.96875 1277.5 958.53125 L 1349.816406 1089.203125 Z"/>
+<!-- S -->
+<path fill="currentColor" d="M 516.476562 863.789062 L 549.914062 802.59375 C 500.046875 752.0625 378.320312 744.039062 343.109375 825.21875 C 312.6875 911.417969 379.355469 945.28125 445.519531 970.105469 C 521.019531 997.179688 450.554688 1063.730469 368.910156 990.347656 L 328.996094 1049.769531 C 369.855469 1091.484375 472.359375 1122.214844 529.640625 1063.378906 C 574.058594 1017.730469 556.921875 955.710938 525.105469 930.414062 C 493.542969 903.84375 469.871094 903.632812 437.386719 887.941406 C 381.128906 860.761719 435.328125 795.554688 516.476562 863.789062"/>
+
+<!-- HELSE & TRENING subtitle -->
+<g opacity="0.8">
+<use fill="currentColor" xlink:href="#glyph-0-0" x="327.7979" y="1232.2959"/>
+<use fill="currentColor" xlink:href="#glyph-0-1" x="435.9899" y="1232.2959"/>
+<use fill="currentColor" xlink:href="#glyph-0-2" x="526.9979" y="1232.2959"/>
+<use fill="currentColor" xlink:href="#glyph-0-3" x="612.9179" y="1232.2959"/>
+<use fill="currentColor" xlink:href="#glyph-0-1" x="700.7579" y="1232.2959"/>
+<use fill="currentColor" xlink:href="#glyph-0-4" x="791.7659" y="1232.2959"/>
+<use fill="currentColor" xlink:href="#glyph-0-5" x="853.7819" y="1232.2959"/>
+<use fill="currentColor" xlink:href="#glyph-0-4" x="954.6779" y="1232.2959"/>
+<use fill="currentColor" xlink:href="#glyph-0-6" x="1016.6939" y="1232.2959"/>
+<use fill="currentColor" xlink:href="#glyph-0-7" x="1109.3339" y="1232.2959"/>
+<use fill="currentColor" xlink:href="#glyph-0-1" x="1205.8139" y="1232.2959"/>
+<use fill="currentColor" xlink:href="#glyph-0-8" x="1296.8219" y="1232.2959"/>
+<use fill="currentColor" xlink:href="#glyph-0-9" x="1405.3019" y="1232.2959"/>
+<use fill="currentColor" xlink:href="#glyph-0-8" x="1467.7019" y="1232.2959"/>
+<use fill="currentColor" xlink:href="#glyph-0-10" x="1576.1819" y="1232.2959"/>
+</g>
+</svg></div>
+      <div class="header-divider"></div>
+      <a href="sterk_index.html" class="back-link"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 2L4 6l4 4"/></svg>Velg pakke</a>
+    </div>
+    <div class="header-title-block">
+      <div class="header-eyebrow">// Standard Testing</div>
+      <div class="header-title">Standard fysisk <span>helse</span>undersøkelse</div>
+      <div class="header-subtitle">Sterk Helse & Trening — EGYM + Kondisjonstest VO₂maks</div>
+    </div>
+  </div>
+</header>
+<div class="container">
+<div class="step-bar" id="step-bar"><div class="step-item active" id="step-1" onclick="scrollToSection('pasient')"><div class="step-circle">01</div><div class="step-label">Pasient</div></div><div class="step-line" id="line-1"></div><div class="step-item " id="step-2" onclick="scrollToSection('egym')"><div class="step-circle">02</div><div class="step-label">EGYM</div></div><div class="step-line" id="line-2"></div><div class="step-item " id="step-3" onclick="scrollToSection('bruce')"><div class="step-circle">03</div><div class="step-label">Kondisjon</div></div><div class="step-line" id="line-3"></div><div class="step-item " id="step-4" onclick="scrollToSection('sammendrag')"><div class="step-circle">04</div><div class="step-label">Score</div></div><div class="step-line" id="line-4"></div><div class="step-item " id="step-5" onclick="scrollToSection('eksport')"><div class="step-circle">05</div><div class="step-label">Eksport</div></div></div>
+<!-- ─── PASIENTINFO ─── -->
+  <div class="section-marker" id="pasient">
+    <div class="section-marker-line"></div>
+    <span class="section-marker-tag tag-patient">01 — Pasientinformasjon</span>
+    <div class="section-marker-line"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title ct-patient">// Grunndata</div>
+    <div class="form-grid-3">
+      <div class="form-group field-required" id="req-fodselsdato">
+        <label>Fødselsdato *</label>
+        <input type="date" id="p_fodselsdato">
+      </div>
+      <div class="form-group">
+        <label>Kjønn</label>
+        <select id="p_kjonn">
+          <option value="">Velg</option>
+          <option value="male">Mann</option>
+          <option value="female">Kvinne</option>
+          <option value="other">Annet</option>
+        </select>
+      </div>
+      <div class="form-group field-required" id="req-testdato">
+        <label>Testdato *</label>
+        <input type="date" id="p_testdato">
+      </div>
+    </div>
+    <div class="form-grid" style="margin-top:14px">
+      <div class="form-group">
+        <label>Journalnummer / pasient-ID</label>
+        <input type="text" id="p_journal" placeholder="Eks. 12345">
+      </div>
+      <div class="form-group">
+        <label>Instruktør</label>
+        <input type="text" id="p_instruktor" placeholder="Navn">
+      </div>
+    </div>
+    <div class="last-test-row" id="last-test-row" style="display:none">
+      <span class="last-test-label">Forrige test registrert:</span>
+      <span class="last-test-val" id="last-test-date">—</span>
+      <span class="last-test-days" id="last-test-days"></span>
+    </div>
+  </div>
+
+  
+
+<!-- ─── EGYM ─── -->
+  <div class="section-marker" id="egym">
+    <div class="section-marker-line"></div>
+    <span class="section-marker-tag tag-egym">02 — EGYM Helseregistrering</span>
+    <div class="section-marker-line"></div>
+  </div>
+
+  <div class="card egym-card">
+    <div class="card-title ct-egym">// Styrke, fleksibilitet, metabolsk, kondisjon</div>
+
+    <!-- STYRKE -->
+    <div class="egym-sub">
+      <div class="egym-sub-header" onclick="toggleSub('styrke')">
+        <div class="sub-icon">ST</div>
+        <span class="sub-title">Styrke</span>
+        <span class="sub-bioage" id="lbl_bio_styrke"></span>
+        <span class="sub-chevron" id="chev_styrke">▶</span>
+      </div>
+      <div class="egym-sub-body" id="body_styrke">
+        <div class="form-grid">
+          <div class="form-group"><label>Benkpress</label><div class="input-with-unit"><input type="number" id="s_benkpress" min="0" max="300" placeholder="—"><span class="input-unit">kg</span></div></div>
+          <div class="form-group"><label>Sittende roing</label><div class="input-with-unit"><input type="number" id="s_roing" min="0" max="300" placeholder="—"><span class="input-unit">kg</span></div></div>
+          <div class="form-group"><label>Skulderpress</label><div class="input-with-unit"><input type="number" id="s_skulder" min="0" max="300" placeholder="—"><span class="input-unit">kg</span></div></div>
+          <div class="form-group"><label>Lat pulldown</label><div class="input-with-unit"><input type="number" id="s_lat" min="0" max="300" placeholder="—"><span class="input-unit">kg</span></div></div>
+          <div class="form-group"><label>Beinpress</label><div class="input-with-unit"><input type="number" id="s_beinpress" min="0" max="500" placeholder="—"><span class="input-unit">kg</span></div></div>
+          <div class="form-group"><label>Beinekstensjon</label><div class="input-with-unit"><input type="number" id="s_beinekst" min="0" max="300" placeholder="—"><span class="input-unit">kg</span></div></div>
+          <div class="form-group"><label>Beinkurl</label><div class="input-with-unit"><input type="number" id="s_beinkurl" min="0" max="300" placeholder="—"><span class="input-unit">kg</span></div></div>
+          <div class="form-group"><label>Magemaskin</label><div class="input-with-unit"><input type="number" id="s_mage" min="0" max="200" placeholder="—"><span class="input-unit">kg</span></div></div>
+        </div>
+        <div class="bioage-row">
+          <span class="bioage-label">Styrke BioAge</span>
+          <div class="bioage-input"><input type="number" id="bio_styrke" min="10" max="100" placeholder="—" oninput="syncBioAge()"><span class="bioage-unit">år</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FLEKSIBILITET -->
+    <div class="egym-sub">
+      <div class="egym-sub-header" onclick="toggleSub('fleks')">
+        <div class="sub-icon">FL</div>
+        <span class="sub-title">Fleksibilitet</span>
+        <span class="sub-bioage" id="lbl_bio_fleks"></span>
+        <span class="sub-chevron" id="chev_fleks">▶</span>
+      </div>
+      <div class="egym-sub-body" id="body_fleks">
+        <div class="form-grid">
+          <div class="form-group"><label>Nakke — venstre</label><div class="input-with-unit"><input type="number" id="f_nakke_v" min="0" max="90" placeholder="—"><span class="input-unit">°</span></div></div>
+          <div class="form-group"><label>Nakke — høyre</label><div class="input-with-unit"><input type="number" id="f_nakke_h" min="0" max="90" placeholder="—"><span class="input-unit">°</span></div></div>
+          <div class="form-group"><label>Hofte — venstre</label><div class="input-with-unit"><input type="number" id="f_hofte_v" min="0" max="90" placeholder="—"><span class="input-unit">°</span></div></div>
+          <div class="form-group"><label>Hofte — høyre</label><div class="input-with-unit"><input type="number" id="f_hofte_h" min="0" max="90" placeholder="—"><span class="input-unit">°</span></div></div>
+          <div class="form-group"><label>Hamstrings — venstre</label><div class="input-with-unit"><input type="number" id="f_ham_v" min="0" max="120" placeholder="—"><span class="input-unit">°</span></div></div>
+          <div class="form-group"><label>Hamstrings — høyre</label><div class="input-with-unit"><input type="number" id="f_ham_h" min="0" max="120" placeholder="—"><span class="input-unit">°</span></div></div>
+          <div class="form-group"><label>Lateral overkropp — v</label><div class="input-with-unit"><input type="number" id="f_lat_v" min="0" max="90" placeholder="—"><span class="input-unit">°</span></div></div>
+          <div class="form-group"><label>Lateral overkropp — h</label><div class="input-with-unit"><input type="number" id="f_lat_h" min="0" max="90" placeholder="—"><span class="input-unit">°</span></div></div>
+          <div class="form-group"><label>Bryst / skulder</label><div class="input-with-unit"><input type="number" id="f_bryst" min="0" max="180" placeholder="—"><span class="input-unit">°</span></div></div>
+          <div class="form-group"><label>Squat test</label><div class="input-with-unit"><input type="number" id="f_squat" min="0" max="100" placeholder="—"><span class="input-unit">%</span></div></div>
+        </div>
+        <div class="bioage-row">
+          <span class="bioage-label">Fleksibilitet BioAge</span>
+          <div class="bioage-input"><input type="number" id="bio_fleks" min="10" max="100" placeholder="—" oninput="syncBioAge()"><span class="bioage-unit">år</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- METABOLSK -->
+    <div class="egym-sub">
+      <div class="egym-sub-header" onclick="toggleSub('meta')">
+        <div class="sub-icon">ME</div>
+        <span class="sub-title">Metabolsk helse</span>
+        <span class="sub-bioage" id="lbl_bio_meta"></span>
+        <span class="sub-chevron" id="chev_meta">▶</span>
+      </div>
+      <div class="egym-sub-body" id="body_meta">
+        <div class="form-grid">
+          <div class="form-group"><label>Vekt</label><div class="input-with-unit"><input type="number" id="m_vekt" min="30" max="300" step="0.1" placeholder="—" oninput="calcMeta()"><span class="input-unit">kg</span></div></div>
+          <div class="form-group"><label>Høyde</label><div class="input-with-unit"><input type="number" id="m_hoyde" min="100" max="230" placeholder="—" oninput="calcMeta()"><span class="input-unit">cm</span></div></div>
+          <div class="form-group auto-field"><label>BMI (auto)</label><div class="input-with-badge"><div class="input-with-unit"><input type="number" id="m_bmi" readonly placeholder="—"><span class="input-unit">kg/m²</span></div><span class="badge-slot" id="badge_bmi"></span></div></div>
+          <div class="form-group"><label>Midjemål</label><div class="input-with-unit"><input type="number" id="m_midje" min="40" max="200" placeholder="—" oninput="calcMeta()"><span class="input-unit">cm</span></div></div>
+          <div class="form-group"><label>Hoftemål</label><div class="input-with-unit"><input type="number" id="m_hofte" min="40" max="200" placeholder="—" oninput="calcMeta()"><span class="input-unit">cm</span></div></div>
+          <div class="form-group auto-field"><label>WHR (auto)</label><div class="input-with-badge"><div class="input-with-unit"><input type="number" id="m_whr" readonly placeholder="—"></div><span class="badge-slot" id="badge_whr"></span></div></div>
+          <div class="form-group"><label>Fettprosent</label><div class="input-with-badge"><div class="input-with-unit"><input type="number" id="m_fettpct" min="2" max="70" step="0.1" placeholder="—" oninput="calcMeta()"><span class="input-unit">%</span></div><span class="badge-slot" id="badge_fettpct"></span></div></div>
+          <div class="form-group"><label>Muskelmasse</label><div class="input-with-unit"><input type="number" id="m_muskel" min="10" max="100" step="0.1" placeholder="—" oninput="calcMeta()"><span class="input-unit">kg</span></div></div>
+          <div class="form-group auto-field"><label>FFMI (auto)</label><div class="input-with-badge"><div class="input-with-unit"><input type="number" id="m_ffmi" readonly placeholder="—"><span class="input-unit">kg/m²</span></div><span class="badge-slot" id="badge_ffmi"></span></div></div>
+        </div>
+        <div class="bioage-row">
+          <span class="bioage-label">Metabolsk BioAge</span>
+          <div class="bioage-input"><input type="number" id="bio_meta" min="10" max="100" placeholder="—" oninput="syncBioAge()"><span class="bioage-unit">år</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KONDISJON -->
+    <div class="egym-sub">
+      <div class="egym-sub-header" onclick="toggleSub('cardio')">
+        <div class="sub-icon">KO</div>
+        <span class="sub-title">Kondisjon / hjerte-kar</span>
+        <span class="sub-bioage" id="lbl_bio_cardio"></span>
+        <span class="sub-chevron" id="chev_cardio">▶</span>
+      </div>
+      <div class="egym-sub-body" id="body_cardio">
+        <div class="form-grid">
+          <div class="form-group"><label>Hvilepuls</label><div class="input-with-badge"><div class="input-with-unit"><input type="number" id="c_puls" min="30" max="150" placeholder="—" oninput="updateCardioRefs()"><span class="input-unit">bpm</span></div><span class="badge-slot" id="badge_puls"></span></div></div>
+          <div class="form-group"><label>Systolisk BT</label><div class="input-with-badge"><div class="input-with-unit"><input type="number" id="c_sys" min="60" max="250" placeholder="—" oninput="updateCardioRefs()"><span class="input-unit">mmHg</span></div><span class="badge-slot" id="badge_sys"></span></div></div>
+          <div class="form-group"><label>Diastolisk BT</label><div class="input-with-badge"><div class="input-with-unit"><input type="number" id="c_dia" min="40" max="180" placeholder="—" oninput="updateCardioRefs()"><span class="input-unit">mmHg</span></div><span class="badge-slot" id="badge_dia"></span></div></div>
+          <div class="form-group"><label>VO₂maks (EGYM)</label><div class="input-with-unit"><input type="number" id="c_vo2egym" min="10" max="90" step="0.1" placeholder="—"><span class="input-unit">ml/kg/min</span></div></div>
+        </div>
+        <div class="bioage-row">
+          <span class="bioage-label">Kondisjon BioAge</span>
+          <div class="bioage-input"><input type="number" id="bio_cardio" min="10" max="100" placeholder="—" oninput="syncBioAge()"><span class="bioage-unit">år</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GREPSSTYRKE -->
+    <div class="egym-sub">
+      <div class="egym-sub-header" onclick="toggleSub('grip')">
+        <div class="sub-icon">GS</div>
+        <span class="sub-title">Grepsstyrke</span>
+        <span class="sub-bioage" id="lbl_bio_grip"></span>
+        <span class="sub-chevron" id="chev_grip">▶</span>
+      </div>
+      <div class="egym-sub-body" id="body_grip">
+        <div class="form-grid">
+          <div class="form-group"><label>Høyre hånd — forsøk 1</label><div class="input-with-unit"><input type="number" id="g_h1" min="0" max="120" step="0.1" placeholder="—" oninput="calcGrip()"><span class="input-unit">kg</span></div></div>
+          <div class="form-group"><label>Venstre hånd — forsøk 1</label><div class="input-with-unit"><input type="number" id="g_v1" min="0" max="120" step="0.1" placeholder="—" oninput="calcGrip()"><span class="input-unit">kg</span></div></div>
+          <div class="form-group"><label>Høyre hånd — forsøk 2</label><div class="input-with-unit"><input type="number" id="g_h2" min="0" max="120" step="0.1" placeholder="—" oninput="calcGrip()"><span class="input-unit">kg</span></div></div>
+          <div class="form-group"><label>Venstre hånd — forsøk 2</label><div class="input-with-unit"><input type="number" id="g_v2" min="0" max="120" step="0.1" placeholder="—" oninput="calcGrip()"><span class="input-unit">kg</span></div></div>
+          <div class="form-group"><label>Høyre hånd — forsøk 3</label><div class="input-with-unit"><input type="number" id="g_h3" min="0" max="120" step="0.1" placeholder="—" oninput="calcGrip()"><span class="input-unit">kg</span></div></div>
+          <div class="form-group"><label>Venstre hånd — forsøk 3</label><div class="input-with-unit"><input type="number" id="g_v3" min="0" max="120" step="0.1" placeholder="—" oninput="calcGrip()"><span class="input-unit">kg</span></div></div>
+          <div class="form-group auto-field"><label>Beste høyre</label><div class="input-with-badge"><div class="input-with-unit"><input type="number" id="g_best_h" readonly placeholder="—"><span class="input-unit">kg</span></div><span class="badge-slot" id="badge_grip_h"></span></div></div>
+          <div class="form-group auto-field"><label>Beste venstre</label><div class="input-with-badge"><div class="input-with-unit"><input type="number" id="g_best_v" readonly placeholder="—"><span class="input-unit">kg</span></div><span class="badge-slot" id="badge_grip_v"></span></div></div>
+          <div class="form-group auto-field full"><label>Dominant hånd — snitt av beste</label><div class="input-with-badge"><div class="input-with-unit"><input type="number" id="g_max" readonly placeholder="—"><span class="input-unit">kg</span></div><span class="badge-slot" id="badge_grip_max"></span></div></div>
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:10px;line-height:1.7;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px">
+          Protokoll: Sittende, skulder addusert, albue 90°, underarm nøytral. 3 forsøk per hånd, 30 sek pause mellom forsøk. Beste resultat per hånd registreres. Grenseverdier for muskelsvakhet: &lt;27 kg (menn), &lt;16 kg (kvinner).
+        </div>
+      </div>
+    </div>
+
+    <!-- EGYM TOTAL -->
+    <div class="egym-total">
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">EGYM samlet BioAge</div>
+        <div style="font-size:12px;color:var(--muted)">Snitt av registrerte komponenter</div>
+      </div>
+      <div style="display:flex;align-items:baseline;gap:6px">
+        <span class="egym-total-val" id="egym_total_val">—</span>
+        <span class="egym-total-unit">år</span>
+      </div>
+    </div>
+  </div>
+
+  
+
+<!-- ─── KONDISJONSTEST ─── -->
+  <div class="section-marker" id="bruce">
+    <div class="section-marker-line"></div>
+    <span class="section-marker-tag tag-kondisjon">03 — Kondisjonstest (VO₂maks)</span>
+    <div class="section-marker-line"></div>
+  </div>
+
+  <div class="card bruce-card">
+    <div class="card-title ct-bruce">// Velg testmetode</div>
+    <div class="sync-notice" id="sync-notice">
+      <span>↑</span> Alder og kjønn er hentet fra pasientinfo
+    </div>
+
+    <!-- ─── PRIMARY MODE TOGGLE ─── -->
+    <div class="mode-toggle">
+      <button class="mode-btn active" onclick="setMode('treadmill')">Tredemølle</button>
+      <button class="mode-btn" onclick="setMode('cycle')">Sykkelergometer</button>
+    </div>
+
+    <!-- ════════════════════════════════════════ -->
+    <!-- TREDEMØLLE MODE                         -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="mode-section show" id="mode-treadmill">
+
+      <div class="protocol-toggle">
+        <button class="toggle-btn active" onclick="setProtocol('max')">Standard Bruce</button>
+        <button class="toggle-btn" onclick="setProtocol('modified')">Modifisert Bruce</button>
+      </div>
+
+      <div class="protocol-info show" id="max-info" style="border-left-color: var(--accent4);">
+        <strong>Standard Bruce</strong> – Maksimal test til utmattelse. Starter på 2,7 km/t og 10 % stigning, øker hvert 3. minutt. Tast inn total testtid. Valgfri HF-korreksjon for submaksimal bruk.
+      </div>
+
+      <div class="protocol-info" id="modified-info" style="border-left-color: var(--accent4);">
+        <strong>Modifisert Bruce</strong> – Starter med to ekstra lavbelastningstrinn (0 % og 5 % stigning) for utrente, eldre eller pasienter med begrensninger. Avsluttes ved 85 % av maks puls eller utmattelse. Tast inn testtid og HF ved avslutning.
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Kjønn</label>
+          <select id="b_gender">
+            <option value="male">Mann</option>
+            <option value="female">Kvinne</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Alder</label>
+          <input type="number" id="b_age" placeholder="35" min="18" max="90">
+          <span class="field-hint">Hentes fra pasientinfo hvis fylt ut</span>
+        </div>
+
+        <div class="form-group full" id="time-group">
+          <label>Testtid (min : sek)</label>
+          <div class="time-row">
+            <input type="number" id="min" placeholder="12" min="0" max="30">
+            <span class="time-sep">:</span>
+            <input type="number" id="sec" placeholder="00" min="0" max="59">
+          </div>
+          <div class="time-labels"><span>MINUTTER</span><span>SEKUNDER</span></div>
+        </div>
+
+        <div class="form-group full submax-fields" id="submax-fields">
+          <label>HF ved avslutning (slag/min) — valgfri</label>
+          <input type="number" id="hr" placeholder="Blank = maksimal test" min="60" max="220">
+          <span class="field-hint">Fyll inn for submaksimal korreksjon, la stå tom for maksimal test</span>
+        </div>
+
+        <div class="form-group full modified-fields" id="modified-hr-field">
+          <label>HF ved avslutning (slag/min)</label>
+          <input type="number" id="hr-modified" placeholder="145" min="60" max="220">
+          <span class="field-hint">Brukes til HF-korreksjon (anbefalt for modifisert Bruce)</span>
+        </div>
+      </div>
+
+      <p class="error-msg" id="error-msg"></p>
+      <button class="calc-btn" id="calc-btn" onclick="calculateBruce()">Beregn VO₂maks</button>
+    </div>
+
+    <!-- ════════════════════════════════════════ -->
+    <!-- SYKKELERGOMETER MODE (ÅSTRAND)          -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="mode-section" id="mode-cycle">
+
+      <div class="protocol-info show" style="border-left-color: var(--accent4);">
+        <strong>Åstrand 6-min sykkeltest</strong> – Submaksimal test på ergometersykkel. Pasienten sykler i 6 minutter med konstant belastning (watt) og jevn tråkkfrekvens (50–70 rpm). Steady-state puls er snitt av min 5 og 6 (maks 5 bpm differanse). VO₂maks beregnes via Åstrand-Ryhming nomogrammet med alderskorreksjon.
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Kjønn</label>
+          <select id="a_gender">
+            <option value="male">Mann</option>
+            <option value="female">Kvinne</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Alder</label>
+          <input type="number" id="a_age" placeholder="35" min="18" max="90">
+          <span class="field-hint">Hentes fra pasientinfo</span>
+        </div>
+        <div class="form-group">
+          <label>Belastning</label>
+          <div class="input-with-unit">
+            <input type="number" id="a_watt" placeholder="100" min="25" max="350" step="25">
+            <span class="input-unit">watt</span>
+          </div>
+          <span class="field-hint">Kvinner: 75–125 W · Menn: 100–175 W</span>
+        </div>
+        <div class="form-group">
+          <label>Kroppsvekt</label>
+          <div class="input-with-unit">
+            <input type="number" id="a_vekt" placeholder="—" min="30" max="300" step="0.1">
+            <span class="input-unit">kg</span>
+          </div>
+          <span class="field-hint">Auto-fylt fra metabolsk seksjon</span>
+        </div>
+        <div class="form-group">
+          <label>Puls minutt 5</label>
+          <div class="input-with-unit">
+            <input type="number" id="a_hr5" placeholder="135" min="60" max="200">
+            <span class="input-unit">bpm</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Puls minutt 6</label>
+          <div class="input-with-unit">
+            <input type="number" id="a_hr6" placeholder="138" min="60" max="200">
+            <span class="input-unit">bpm</span>
+          </div>
+        </div>
+      </div>
+
+      <p class="error-msg" id="error-msg-cycle"></p>
+      <button class="calc-btn" onclick="calculateAstrand()">Beregn VO₂maks</button>
+    </div>
+  </div>
+
+  <div class="result-card" id="result-card">
+    <div class="card-title ct-bruce">// Resultat</div>
+    <div class="result-main">
+      <div class="vo2-value" id="vo2-display">—</div>
+      <div class="vo2-unit">ml/kg<br>/min</div>
+    </div>
+    <div class="result-meta">
+      <div class="meta-item">
+        <div class="meta-label" id="meta-label-1">Testtid</div>
+        <div class="meta-value" id="res-time">—</div>
+      </div>
+      <div class="meta-item" id="res-hf-tile">
+        <div class="meta-label">HF / HFmaks</div>
+        <div class="meta-value" id="res-hfmax">—</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Protokoll</div>
+        <div class="meta-value" id="res-protocol">—</div>
+      </div>
+    </div>
+    <div class="classification" id="classification">
+      <div class="class-label">Kondisjonskategori (ACSM)</div>
+      <div class="class-value" id="class-text">—</div>
+    </div>
+  </div>
+
+  <div class="card bruce-card" style="margin-top:14px" id="protocol-ref-card">
+    <div class="card-title ct-bruce" id="table-title">// Standard Bruce — referanseprotokoll</div>
+    <table class="protocol-table" id="protocol-table">
+      <thead>
+        <tr>
+          <th>Trinn</th><th>Tid (min)</th><th>Hastighet (km/t)</th><th>Helning (%)</th><th>METs</th>
+        </tr>
+      </thead>
+      <tbody id="protocol-tbody">
+        <tr class="modified-row" data-mod="0"><td>M1</td><td>0–3</td><td>2.7</td><td>0</td><td>2.3</td></tr>
+        <tr class="modified-row" data-mod="1"><td>M2</td><td>3–6</td><td>2.7</td><td>5</td><td>3.5</td></tr>
+        <tr data-stage="1"><td>1</td><td>0–3</td><td>2.7</td><td>10</td><td>4.6</td></tr>
+        <tr data-stage="2"><td>2</td><td>3–6</td><td>4.0</td><td>12</td><td>7.0</td></tr>
+        <tr data-stage="3"><td>3</td><td>6–9</td><td>5.5</td><td>14</td><td>10.1</td></tr>
+        <tr data-stage="4"><td>4</td><td>9–12</td><td>6.8</td><td>16</td><td>12.9</td></tr>
+        <tr data-stage="5"><td>5</td><td>12–15</td><td>8.0</td><td>18</td><td>15.0</td></tr>
+        <tr data-stage="6"><td>6</td><td>15–18</td><td>8.9</td><td>20</td><td>16.9</td></tr>
+        <tr data-stage="7"><td>7</td><td>18–21</td><td>9.7</td><td>22</td><td>19.0</td></tr>
+      </tbody>
+    </table>
+    <div class="table-legend" id="table-legend">
+      <span><span class="legend-dot" style="background:var(--accent4)"></span>Modifisert Bruce ekstratrinn</span>
+    </div>
+
+    <!-- Åstrand reference table (hidden by default) -->
+    <div id="astrand-ref" style="display:none">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent4);margin-bottom:14px">// Åstrand — anbefalt belastning</div>
+      <table class="protocol-table">
+        <thead><tr><th>Gruppe</th><th>Belastning</th><th>Tråkkfrekvens</th><th>Varighet</th></tr></thead>
+        <tbody>
+          <tr><td>Utrente kvinner</td><td>75 W</td><td>50–60 rpm</td><td>6 min</td></tr>
+          <tr><td>Aktive kvinner</td><td>100–125 W</td><td>50–70 rpm</td><td>6 min</td></tr>
+          <tr><td>Utrente menn</td><td>100 W</td><td>50–60 rpm</td><td>6 min</td></tr>
+          <tr><td>Aktive menn</td><td>125–175 W</td><td>50–70 rpm</td><td>6 min</td></tr>
+        </tbody>
+      </table>
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:10px;line-height:1.7">
+        Steady-state: snitt av puls min 5 og 6 (differanse ≤ 5 bpm).<br>
+        Puls bør ligge mellom 120–170 bpm for gyldig resultat.
+      </div>
+    </div>
+  </div>
+
+  
+
+<!-- ─── SAMMENDRAG ─── -->
+  <div class="section-marker" id="summary">
+    <div class="section-marker-line"></div>
+    <span class="section-marker-tag tag-summary">04 — Samlet helsescore</span>
+    <div class="section-marker-line"></div>
+  </div>
+
+  <div class="card summary-card">
+    <div class="card-title ct-summary">// Oversikt alle målinger</div>
+
+    <div class="summary-grid">
+      <div class="sum-tile highlight-tile">
+        <div class="sum-tile-label">EGYM BioAge</div>
+        <div class="sum-tile-val" id="sum_egym_bioage">—</div>
+        <div class="sum-tile-unit">år</div>
+      </div>
+      <div class="sum-tile highlight-tile">
+        <div class="sum-tile-label">VO₂maks</div>
+        <div class="sum-tile-val" id="sum_vo2">—</div>
+        <div class="sum-tile-unit">ml/kg/min</div>
+      </div>
+      <div class="sum-tile">
+        <div class="sum-tile-label">Kronologisk alder</div>
+        <div class="sum-tile-val" id="sum_kronalder" style="color:var(--accent)">—</div>
+        <div class="sum-tile-unit">år</div>
+      </div>
+      <div class="sum-tile">
+        <div class="sum-tile-label">Blodtrykk</div>
+        <div class="sum-tile-val" id="sum_bt" style="color:var(--text);font-size:22px">—</div>
+        <div class="sum-tile-unit">mmHg</div>
+      </div>
+      <div class="sum-tile">
+        <div class="sum-tile-label">BMI</div>
+        <div class="sum-tile-val" id="sum_bmi" style="color:var(--text)">—</div>
+        <div class="sum-tile-unit">kg/m²</div>
+      </div>
+      <div class="sum-tile">
+        <div class="sum-tile-label">ACSM kondisjon</div>
+        <div class="sum-tile-val" id="sum_acsm" style="color:var(--accent3);font-size:16px;padding-top:6px">—</div>
+        <div class="sum-tile-unit"></div>
+      </div>
+      <div class="sum-tile">
+        <div class="sum-tile-label">Grepsstyrke</div>
+        <div class="sum-tile-val" id="sum_grip" style="color:var(--text)">—</div>
+        <div class="sum-tile-unit">kg</div>
+      </div>
+    </div>
+
+    <div class="delta-row" id="delta-row" style="display:none">
+      <span class="delta-label">BioAge vs kronologisk alder:</span>
+      <span class="delta-val" id="delta-val">—</span>
+    </div>
+
+    <div class="form-group" style="margin-top:12px">
+      <label>Kommentar / kliniske observasjoner</label>
+      <textarea class="comment-area" id="kommentar" placeholder="Fritekst til journal..."></textarea>
+    </div>
+
+    <div class="history-section">
+      <div class="history-header">
+        <span class="history-title">// Testhistorikk (denne enheten)</span>
+        <button class="history-clear" onclick="clearHistory()">Slett historikk</button>
+      </div>
+      <div id="history-body">
+        <div class="history-empty" id="history-empty">Ingen tidligere tester registrert på denne enheten.</div>
+        <div class="history-scroll-wrap">
+        <table class="history-table" id="history-table" style="display:none">
+          <thead>
+            <tr>
+              <th>Dato</th><th>BioAge</th><th>VO₂maks</th><th>BMI</th><th>BT</th><th>Grep</th><th>Δ Bio</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="history-rows"></tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+
+<!-- ─── EKSPORT ─── -->
+  <div class="section-marker" id="export">
+    <div class="section-marker-line"></div>
+    <span class="section-marker-tag tag-export">05 — Send til Pasientsky</span>
+    <div class="section-marker-line"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="color:var(--accent3)">// Eksporter</div>
+    <div class="export-actions">
+      <button class="export-btn primary" onclick="generatePDF()" style="background:var(--accent2);border-color:var(--accent2);">Last ned PDF</button>
+      <button class="export-btn" onclick="copyJournal()">Kopier journaltekst</button>
+      <button class="export-btn email-btn" onclick="openEmailModal()">Send på e-post →</button>
+      <button class="export-btn no-print" onclick="window.print()" style="border-color:rgba(0,229,255,0.3);color:var(--accent);">Skriv ut</button>
+    </div>
+    <div class="export-preview" id="export-preview">
+      <pre id="export-content"></pre>
+      <div class="export-actions">
+        <button class="export-btn" onclick="downloadTxt()">Last ned .txt</button>
+        <button class="export-btn" onclick="copyJournal()">Kopier igjen</button>
+      </div>
+    </div>
+    <div class="status-toast" id="status-toast"></div>
+  </div>
+
+</div>
+
+
+
+</div>
+<script>
+// ─── STATE ───────────────────────────────────────────
+let bruceVo2 = null;
+let bruceCategory = null;
+let currentProtocol = 'max';
+let currentMode = 'treadmill';
+
+// ─── UTILS ───────────────────────────────────────────
+const g = id => document.getElementById(id);
+const v = id => g(id) ? g(id).value : '';
+const setv = (id, val) => { if (g(id)) g(id).value = val; };
+const n = id => parseFloat(v(id));
+
+function calcAge(dateStr) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr), now = new Date();
+  let age = now.getFullYear() - d.getFullYear();
+  const m = now.getMonth() - d.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
+  return age > 0 && age < 120 ? age : null;
+}
+
+function badge(cls, text) {
+  return `<span class="ref-badge ${cls}"><span class="ref-dot"></span>${text}</span>`;
+}
+function setBadge(slotId, cls, text) {
+  const el = g(slotId);
+  if (!el) return;
+  el.innerHTML = cls ? badge(cls, text) : '';
+}
+
+// ─── REFERENCE VALUES (WHO / ESH / ACSM) ─────────────
+function refBMI(bmi) {
+  if (!bmi || isNaN(bmi)) return null;
+  if (bmi < 18.5) return ['ref-yellow', 'Undervekt'];
+  if (bmi < 25)   return ['ref-green',  'Normalt'];
+  if (bmi < 30)   return ['ref-yellow', 'Overvekt'];
+  return ['ref-red', 'Fedme'];
+}
+function refWHR(whr, gender) {
+  if (!whr || isNaN(whr)) return null;
+  const isMale = gender === 'male';
+  if (isMale)  return whr < 0.90 ? ['ref-green','Lav risiko'] : whr < 1.00 ? ['ref-yellow','Moderat'] : ['ref-red','Høy risiko'];
+  return whr < 0.80 ? ['ref-green','Lav risiko'] : whr < 0.85 ? ['ref-yellow','Moderat'] : ['ref-red','Høy risiko'];
+}
+function refFett(fettpct, gender, age) {
+  if (!fettpct || isNaN(fettpct) || !age) return null;
+  const isMale = gender === 'male';
+  let lo, hi;
+  if (isMale) {
+    if (age < 30)      { lo=8;  hi=20; }
+    else if (age < 40) { lo=11; hi=22; }
+    else if (age < 50) { lo=13; hi=24; }
+    else               { lo=15; hi=26; }
+  } else {
+    if (age < 30)      { lo=21; hi=33; }
+    else if (age < 40) { lo=23; hi=35; }
+    else if (age < 50) { lo=25; hi=37; }
+    else               { lo=27; hi=39; }
+  }
+  if (fettpct < lo) return ['ref-yellow','Under norm'];
+  if (fettpct <= hi) return ['ref-green','Normalt'];
+  return ['ref-red','Over norm'];
+}
+function refFFMI(ffmi, gender) {
+  if (!ffmi || isNaN(ffmi)) return null;
+  const isMale = gender === 'male';
+  if (isMale)  return ffmi >= 20 ? ['ref-green','God'] : ffmi >= 17 ? ['ref-yellow','Moderat'] : ['ref-red','Lav'];
+  return ffmi >= 17 ? ['ref-green','God'] : ffmi >= 14 ? ['ref-yellow','Moderat'] : ['ref-red','Lav'];
+}
+function refPuls(puls) {
+  if (!puls || isNaN(puls)) return null;
+  if (puls < 60) return ['ref-yellow','Under norm'];
+  if (puls <= 100) return ['ref-green','Normalt'];
+  return ['ref-red','Forhøyet'];
+}
+function refSys(sys) {
+  if (!sys || isNaN(sys)) return null;
+  if (sys < 120)  return ['ref-green','Optimalt'];
+  if (sys < 130)  return ['ref-green','Normalt'];
+  if (sys < 140)  return ['ref-yellow','Høy-normal'];
+  if (sys < 160)  return ['ref-yellow','Grad 1'];
+  return ['ref-red','Grad 2+'];
+}
+function refDia(dia) {
+  if (!dia || isNaN(dia)) return null;
+  if (dia < 80)  return ['ref-green','Normalt'];
+  if (dia < 90)  return ['ref-yellow','Høy-normal'];
+  if (dia < 100) return ['ref-yellow','Grad 1'];
+  return ['ref-red','Grad 2+'];
+}
+
+// Grip strength reference values based on age and gender (Roberts 2011, Bohannon 2019)
+// Returns [classification, color] based on best grip (dominant hand)
+function refGrip(kg, gender, age) {
+  if (!kg || isNaN(kg) || !age) return null;
+  const isMale = gender === 'male';
+  // Normative mean values by age decade (approximate, from meta-analyses)
+  // Format: [weak_cutoff, below_avg, above_avg] — below weak = red, weak-below_avg = yellow, above = green
+  let weak, low;
+  if (isMale) {
+    if (age < 30)      { weak = 37; low = 44; }
+    else if (age < 40) { weak = 37; low = 44; }
+    else if (age < 50) { weak = 35; low = 41; }
+    else if (age < 60) { weak = 31; low = 38; }
+    else if (age < 70) { weak = 27; low = 34; }
+    else               { weak = 22; low = 28; }
+  } else {
+    if (age < 30)      { weak = 22; low = 27; }
+    else if (age < 40) { weak = 22; low = 27; }
+    else if (age < 50) { weak = 20; low = 25; }
+    else if (age < 60) { weak = 18; low = 23; }
+    else if (age < 70) { weak = 16; low = 20; }
+    else               { weak = 13; low = 17; }
+  }
+  // Sarcopenia cutoffs: <27 kg men, <16 kg women (EWGSOP2)
+  const sarcopeniaLimit = isMale ? 27 : 16;
+  if (kg < sarcopeniaLimit) return ['ref-red', 'Svak (sarkopeni)'];
+  if (kg < weak) return ['ref-red', 'Under norm'];
+  if (kg < low) return ['ref-yellow', 'Lav-normal'];
+  return ['ref-green', 'Normal/god'];
+}
+
+function calcGrip() {
+  const h1 = parseFloat(v('g_h1')) || 0;
+  const h2 = parseFloat(v('g_h2')) || 0;
+  const h3 = parseFloat(v('g_h3')) || 0;
+  const v1 = parseFloat(v('g_v1')) || 0;
+  const v2 = parseFloat(v('g_v2')) || 0;
+  const v3 = parseFloat(v('g_v3')) || 0;
+
+  const hVals = [h1, h2, h3].filter(x => x > 0);
+  const vVals = [v1, v2, v3].filter(x => x > 0);
+
+  const bestH = hVals.length > 0 ? Math.max(...hVals) : 0;
+  const bestV = vVals.length > 0 ? Math.max(...vVals) : 0;
+
+  setv('g_best_h', bestH > 0 ? bestH.toFixed(1) : '');
+  setv('g_best_v', bestV > 0 ? bestV.toFixed(1) : '');
+
+  // Max of both hands as dominant indicator
+  const maxGrip = Math.max(bestH, bestV);
+  setv('g_max', maxGrip > 0 ? maxGrip.toFixed(1) : '');
+
+  // Apply reference badges
+  const gender = v('p_kjonn') || 'male';
+  const age = calcAge(v('p_fodselsdato'));
+  const applyBadge = (slotId, ref) => {
+    if (ref) setBadge(slotId, ref[0], ref[1]);
+    else setBadge(slotId, null, '');
+  };
+  applyBadge('badge_grip_h', bestH > 0 ? refGrip(bestH, gender, age) : null);
+  applyBadge('badge_grip_v', bestV > 0 ? refGrip(bestV, gender, age) : null);
+  applyBadge('badge_grip_max', maxGrip > 0 ? refGrip(maxGrip, gender, age) : null);
+
+  updateSummary();
+}
+
+function updateAllRefs() {
+  const gender = v('p_kjonn') || v('b_gender');
+  const age = calcAge(v('p_fodselsdato'));
+  const bmi = n('m_bmi'), whr = n('m_whr');
+  const fettpct = n('m_fettpct'), ffmi = n('m_ffmi');
+  const puls = n('c_puls'), sys = n('c_sys'), dia = n('c_dia');
+
+  const applyBadge = (slotId, ref) => {
+    if (ref) setBadge(slotId, ref[0], ref[1]);
+    else setBadge(slotId, null, '');
+  };
+  applyBadge('badge_bmi',    refBMI(bmi));
+  applyBadge('badge_whr',    refWHR(whr, gender));
+  applyBadge('badge_fettpct', refFett(fettpct, gender, age));
+  applyBadge('badge_ffmi',   refFFMI(ffmi, gender));
+  applyBadge('badge_puls',   refPuls(puls));
+  applyBadge('badge_sys',    refSys(sys));
+  applyBadge('badge_dia',    refDia(dia));
+
+  // Update grip badges when age/gender changes
+  const gripMax = parseFloat(v('g_max'));
+  const gripH = parseFloat(v('g_best_h'));
+  const gripV = parseFloat(v('g_best_v'));
+  applyBadge('badge_grip_max', gripMax > 0 ? refGrip(gripMax, gender, age) : null);
+  applyBadge('badge_grip_h',   gripH > 0 ? refGrip(gripH, gender, age) : null);
+  applyBadge('badge_grip_v',   gripV > 0 ? refGrip(gripV, gender, age) : null);
+}
+function updateCardioRefs() { updateAllRefs(); updateSummary(); }
+
+// ─── EGYM SUBSECTIONS ────────────────────────────────
+function toggleSub(id) {
+  const body = g('body_' + id);
+  const chev = g('chev_' + id);
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  chev.classList.toggle('open', !isOpen);
+  chev.textContent = isOpen ? '▶' : '▼';
+  // On touch devices, scroll the opened section into view
+  if (!isOpen && 'ontouchstart' in window) {
+    setTimeout(() => {
+      body.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 100);
+  }
+}
+
+// ─── EGYM DERIVED FIELDS ─────────────────────────────
+function calcMeta() {
+  const vekt = n('m_vekt'), hoyde = n('m_hoyde') / 100;
+  const midje = n('m_midje'), hofte = n('m_hofte');
+  const fettpct = n('m_fettpct');
+  if (vekt && hoyde) setv('m_bmi', (vekt / (hoyde * hoyde)).toFixed(1));
+  if (midje && hofte) setv('m_whr', (midje / hofte).toFixed(2));
+  if (vekt && hoyde && fettpct) {
+    const ffm = vekt * (1 - fettpct / 100);
+    setv('m_ffmi', (ffm / (hoyde * hoyde)).toFixed(1));
+  }
+  syncBioAge();
+  updateAllRefs();
+  updateSummary();
+}
+
+// ─── BIOAGE SYNC ─────────────────────────────────────
+function syncBioAge() {
+  const ids = ['bio_styrke', 'bio_fleks', 'bio_meta', 'bio_cardio'];
+  const labels = ['lbl_bio_styrke', 'lbl_bio_fleks', 'lbl_bio_meta', 'lbl_bio_cardio'];
+  const vals = [];
+  ids.forEach((id, i) => {
+    const val = v(id);
+    g(labels[i]).textContent = val ? val + ' år' : '';
+    const num = parseFloat(val);
+    if (!isNaN(num)) vals.push(num);
+  });
+  const totalEl = g('egym_total_val');
+  if (vals.length > 0) {
+    const avg = Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
+    totalEl.textContent = avg;
+    updateSummary();
+  } else {
+    totalEl.textContent = '—';
+  }
+}
+
+// ─── SUMMARY UPDATE ──────────────────────────────────
+function updateSummary() {
+  const egymBioAge = g('egym_total_val').textContent;
+  g('sum_egym_bioage').textContent = egymBioAge !== '—' ? egymBioAge : '—';
+
+  if (bruceVo2 !== null) {
+    g('sum_vo2').textContent = bruceVo2;
+    g('sum_acsm').textContent = bruceCategory || '—';
+  }
+
+  const bmi = v('m_bmi');
+  g('sum_bmi').textContent = bmi || '—';
+
+  const grip = v('g_max');
+  g('sum_grip').textContent = grip || '—';
+
+  const sys = v('c_sys'), dia = v('c_dia');
+  g('sum_bt').textContent = (sys && dia) ? sys + '/' + dia : '—';
+
+  const age = calcAge(v('p_fodselsdato'));
+  g('sum_kronalder').textContent = age !== null ? age : '—';
+
+  if (egymBioAge !== '—' && age !== null) {
+    const bioNum = parseInt(egymBioAge);
+    const diff = bioNum - age;
+    const deltaEl = g('delta-val');
+    g('delta-row').style.display = 'flex';
+    if (diff < 0) {
+      deltaEl.textContent = Math.abs(diff) + ' år yngre biologisk';
+      deltaEl.className = 'delta-val younger';
+    } else if (diff > 0) {
+      deltaEl.textContent = diff + ' år eldre biologisk';
+      deltaEl.className = 'delta-val older';
+    } else {
+      deltaEl.textContent = 'Tilsvarer kronologisk alder';
+      deltaEl.className = 'delta-val same';
+    }
+  }
+}
+
+// ─── MODE TOGGLE (Treadmill / Cycle) ────────────────
+function setMode(mode) {
+  currentMode = mode;
+  const btns = document.querySelectorAll('.mode-btn');
+  btns.forEach(b => b.classList.remove('active'));
+  btns[mode === 'treadmill' ? 0 : 1].classList.add('active');
+  g('mode-treadmill').classList.toggle('show', mode === 'treadmill');
+  g('mode-cycle').classList.toggle('show', mode === 'cycle');
+  g('result-card').classList.remove('show');
+  g('protocol-ref-card').style.display = mode === 'treadmill' ? '' : '';
+  g('protocol-table').style.display = mode === 'treadmill' ? '' : 'none';
+  g('table-legend').style.display = mode === 'treadmill' && currentProtocol === 'modified' ? 'flex' : 'none';
+  const astrandRef = g('astrand-ref');
+  if (astrandRef) astrandRef.style.display = mode === 'cycle' ? 'block' : 'none';
+  if (mode === 'cycle') {
+    g('table-title').textContent = '// Åstrand — anbefalt belastning';
+    // Auto-fill weight and demographics
+    const vekt = v('m_vekt');
+    if (vekt && !v('a_vekt')) setv('a_vekt', vekt);
+    const kjonn = v('p_kjonn');
+    if (kjonn === 'male' || kjonn === 'female') g('a_gender').value = kjonn;
+    const age = calcAge(v('p_fodselsdato'));
+    if (age && !v('a_age')) setv('a_age', age);
+  } else {
+    updateTableTitle();
+  }
+  syncDemographics();
+}
+
+// ─── BRUCE PROTOCOL ──────────────────────────────────
+function setProtocol(p) {
+  currentProtocol = p;
+  const btns = document.querySelectorAll('.protocol-toggle .toggle-btn');
+  btns.forEach(b => b.classList.remove('active'));
+  const idx = p === 'max' ? 0 : 1;
+  btns[idx].classList.add('active');
+  g('max-info').classList.toggle('show', p === 'max');
+  g('modified-info').classList.toggle('show', p === 'modified');
+  // Standard Bruce: show optional HF field
+  g('submax-fields').classList.toggle('show', p === 'max');
+  // Modified Bruce: show required HF field
+  const modFields = document.querySelectorAll('.modified-fields');
+  modFields.forEach(el => el.classList.toggle('show', p === 'modified'));
+  // Show modified rows in table
+  const modRows = document.querySelectorAll('.modified-row');
+  modRows.forEach(r => r.classList.toggle('show', p === 'modified'));
+  g('table-legend').classList.toggle('show', p === 'modified');
+  // Update time labels for modified (offset by 6 min)
+  updateTableTitle();
+  updateModifiedTableTimes();
+  g('result-card').classList.remove('show');
+  g('error-msg').classList.remove('show');
+  if (g('res-hf-tile')) g('res-hf-tile').style.display = '';
+}
+
+function updateTableTitle() {
+  if (currentProtocol === 'modified') {
+    g('table-title').textContent = '// Modifisert Bruce — referanseprotokoll';
+  } else {
+    g('table-title').textContent = '// Standard Bruce — referanseprotokoll';
+  }
+}
+
+function updateModifiedTableTimes() {
+  // When modified is selected, adjust standard stage times to account for 6-min offset
+  const stageRows = document.querySelectorAll('#protocol-table tbody tr[data-stage]');
+  const isModified = currentProtocol === 'modified';
+  const offset = isModified ? 6 : 0;
+  const stageTimes = [[0,3],[3,6],[6,9],[9,12],[12,15],[15,18],[18,21]];
+  stageRows.forEach((r, i) => {
+    const tds = r.querySelectorAll('td');
+    if (tds.length >= 2) {
+      tds[1].textContent = (stageTimes[i][0]+offset) + '–' + (stageTimes[i][1]+offset);
+    }
+  });
+}
+
+function syncDemographics() {
+  const age = calcAge(v('p_fodselsdato'));
+  const kjonn = v('p_kjonn');
+  if (age !== null) {
+    if (!v('b_age')) setv('b_age', age);
+    if (!v('a_age')) setv('a_age', age);
+  }
+  if (kjonn === 'male' || kjonn === 'female') {
+    g('b_gender').value = kjonn;
+    g('a_gender').value = kjonn;
+  }
+  const synced = (age !== null) || (kjonn === 'male' || kjonn === 'female');
+  g('sync-notice').classList.toggle('show', synced);
+}
+
+function classify(vo2, gender) {
+  const cuts = gender === 'male' ? [28,34,42,52,60] : [24,30,37,45,53];
+  const labels = ['Svært lav','Lav','Moderat','God','Høy','Svært høy'];
+  for (let i = 0; i < cuts.length; i++) { if (vo2 < cuts[i]) return labels[i]; }
+  return labels[labels.length - 1];
+}
+
+const catColors = {
+  'Svært lav':'#ff4d6d','Lav':'#ff9f40','Moderat':'#ffcd56',
+  'God':'#69ff47','Høy':'#00e5ff','Svært høy':'#c77dff'
+};
+
+function showResult(vo2, gender, metaTime, metaHF, protocolLabel) {
+  const cat = classify(vo2, gender);
+  const color = catColors[cat] || '#69ff47';
+  bruceVo2 = vo2;
+  bruceCategory = cat;
+  g('vo2-display').textContent = vo2;
+  g('res-time').textContent = metaTime;
+  g('res-hfmax').textContent = metaHF;
+  g('res-protocol').textContent = protocolLabel;
+  g('class-text').textContent = cat;
+  const showHF = metaHF && metaHF !== '—';
+  if (g('res-hf-tile')) g('res-hf-tile').style.display = showHF ? '' : 'none';
+  const classCard = g('classification');
+  classCard.style.borderLeftColor = color;
+  classCard.style.background = 'rgba(0,0,0,0.15)';
+  g('class-text').style.color = color;
+  g('result-card').classList.add('show');
+  // Update meta label based on mode
+  g('meta-label-1').textContent = currentMode === 'cycle' ? 'Belastning' : 'Testtid';
+  updateSummary();
+}
+
+function calculateBruce() {
+  syncDemographics();
+  const gender = v('b_gender');
+  const age = parseFloat(v('b_age'));
+  const errEl = g('error-msg');
+
+  if (isNaN(age) || age < 18 || age > 90) {
+    errEl.textContent = 'Fyll inn en gyldig alder (18–90).';
+    errEl.classList.add('show'); return;
+  }
+  errEl.classList.remove('show');
+  const hfMax = 220 - age;
+
+  const mins = parseFloat(v('min')) || 0;
+  const secs = parseFloat(v('sec')) || 0;
+  const T = mins + secs / 60;
+  if (T <= 0 || T > 30) { errEl.textContent = 'Fyll inn en gyldig testtid.'; errEl.classList.add('show'); return; }
+
+  let vo2, metaHF = '—', protocolLabel;
+
+  if (currentProtocol === 'modified') {
+    // Modified Bruce: Foster formula for modified Bruce
+    // VO₂maks (ml/kg/min) = (T × 2.282) + 8.545 where T = total time in minutes
+    vo2 = (T * 2.282) + 8.545;
+    protocolLabel = 'Mod. Bruce';
+
+    // HF correction (recommended)
+    const hr = parseFloat(v('hr-modified'));
+    if (!isNaN(hr) && hr >= 60 && hr <= 220) {
+      vo2 = vo2 * (hfMax / hr);
+      metaHF = hr + ' / ' + Math.round(hfMax);
+    }
+  } else {
+    // Standard Bruce
+    vo2 = gender === 'male'
+      ? 14.8 - (1.379*T) + (0.451*Math.pow(T,2)) - (0.012*Math.pow(T,3))
+      : 4.38*T - 3.90;
+    protocolLabel = 'Std. Bruce';
+
+    // Optional HF correction for submaximal
+    const hr = parseFloat(v('hr'));
+    if (!isNaN(hr) && hr >= 60 && hr <= 220) {
+      vo2 = vo2 * (hfMax / hr);
+      metaHF = hr + ' / ' + Math.round(hfMax);
+      protocolLabel = 'Std. Bruce (sub)';
+    }
+  }
+
+  vo2 = Math.max(0, Math.round(vo2 * 10) / 10);
+  const timeStr = String(Math.floor(mins)).padStart(2,'0') + ':' + String(Math.floor(secs)).padStart(2,'0');
+  showResult(vo2, gender, timeStr, metaHF, protocolLabel);
+
+  // Highlight current stage in table
+  document.querySelectorAll('#protocol-table tbody tr[data-stage]').forEach(r => r.classList.remove('highlight'));
+  document.querySelectorAll('#protocol-table tbody tr.modified-row').forEach(r => r.classList.remove('highlight'));
+  if (currentProtocol === 'modified') {
+    // Modified: stages are M1(0-3), M2(3-6), then standard 1-7 at +6 min offset
+    const modStageMins = [3,6,9,12,15,18,21,24,27];
+    const allRows = [...document.querySelectorAll('.modified-row.show'), ...document.querySelectorAll('tr[data-stage]')];
+    for (let i = allRows.length - 1; i >= 0; i--) {
+      if (T >= (i === 0 ? 0 : modStageMins[i - 1])) {
+        allRows[i].classList.add('highlight');
+        break;
+      }
+    }
+  } else {
+    const stageMins = [3,6,9,12,15,18,21];
+    const stageRows = document.querySelectorAll('#protocol-table tbody tr[data-stage]');
+    for (let i = stageMins.length - 1; i >= 0; i--) {
+      if (T >= (i === 0 ? 0 : stageMins[i - 1])) {
+        stageRows[i] && stageRows[i].classList.add('highlight');
+        break;
+      }
+    }
+  }
+}
+
+// ─── ÅSTRAND SYKKELTEST ─────────────────────────────
+function getAstrandAgeCorrection(age) {
+  // Åstrand age correction factors
+  const factors = [
+    [15, 1.10], [25, 1.00], [35, 0.87], [40, 0.83],
+    [45, 0.78], [50, 0.75], [55, 0.71], [60, 0.68], [65, 0.65]
+  ];
+  if (age <= factors[0][0]) return factors[0][1];
+  if (age >= factors[factors.length-1][0]) return factors[factors.length-1][1];
+  for (let i = 0; i < factors.length - 1; i++) {
+    if (age >= factors[i][0] && age < factors[i+1][0]) {
+      const ratio = (age - factors[i][0]) / (factors[i+1][0] - factors[i][0]);
+      return factors[i][1] + ratio * (factors[i+1][1] - factors[i][1]);
+    }
+  }
+  return 0.65;
+}
+
+function astrandNomogram(watt, hr, gender) {
+  // Åstrand-Ryhming nomogram approximation
+  // VO₂ (L/min) from work rate: VO₂ = (watt × 12 + 300) / 1000 for cycling
+  const vo2Work = (watt * 12 + 300) / 1000; // L/min
+  
+  // Predicted VO₂max from nomogram using steady-state HR
+  // Based on the Åstrand-Ryhming nomogram regression
+  let vo2max;
+  if (gender === 'male') {
+    // Male nomogram approximation
+    vo2max = vo2Work * ((220 - 61) / (hr - 61));
+  } else {
+    // Female nomogram approximation  
+    vo2max = vo2Work * ((220 - 72) / (hr - 72));
+  }
+  return vo2max;
+}
+
+function calculateAstrand() {
+  syncDemographics();
+  const gender = v('a_gender');
+  const age = parseFloat(v('a_age'));
+  const watt = parseFloat(v('a_watt'));
+  const vekt = parseFloat(v('a_vekt'));
+  const hr5 = parseFloat(v('a_hr5'));
+  const hr6 = parseFloat(v('a_hr6'));
+  const errEl = g('error-msg-cycle');
+
+  if (isNaN(age) || age < 18 || age > 90) {
+    errEl.textContent = 'Fyll inn en gyldig alder (18–90).';
+    errEl.classList.add('show'); return;
+  }
+  if (isNaN(watt) || watt < 25 || watt > 350) {
+    errEl.textContent = 'Fyll inn gyldig belastning (25–350 watt).';
+    errEl.classList.add('show'); return;
+  }
+  if (isNaN(vekt) || vekt < 30) {
+    errEl.textContent = 'Fyll inn kroppsvekt.';
+    errEl.classList.add('show'); return;
+  }
+  if (isNaN(hr5) || isNaN(hr6) || hr5 < 60 || hr6 < 60 || hr5 > 200 || hr6 > 200) {
+    errEl.textContent = 'Fyll inn gyldige pulsverdier for min 5 og 6 (60–200 bpm).';
+    errEl.classList.add('show'); return;
+  }
+  const hrDiff = Math.abs(hr5 - hr6);
+  if (hrDiff > 5) {
+    errEl.textContent = 'Puls min 5 og 6 avviker med ' + hrDiff + ' bpm (maks 5). Forleng testen eller juster belastning.';
+    errEl.classList.add('show'); return;
+  }
+  const steadyHR = (hr5 + hr6) / 2;
+  if (steadyHR < 120 || steadyHR > 170) {
+    errEl.textContent = 'Steady-state puls (' + Math.round(steadyHR) + ' bpm) bør ligge mellom 120–170 for gyldig resultat.';
+    errEl.classList.add('show'); return;
+  }
+  errEl.classList.remove('show');
+
+  // Calculate VO₂max via nomogram
+  const vo2maxL = astrandNomogram(watt, steadyHR, gender);
+  
+  // Apply age correction
+  const ageFactor = getAstrandAgeCorrection(age);
+  const vo2maxCorrected = vo2maxL * ageFactor;
+  
+  // Convert to ml/kg/min
+  const vo2 = Math.max(0, Math.round((vo2maxCorrected / vekt * 1000) * 10) / 10);
+
+  showResult(vo2, gender, watt + ' W', Math.round(steadyHR) + ' bpm (ss)', 'Åstrand');
+}
+
+// ─── PDF GENERATION (jsPDF) ─────────────────────────
+function generatePDF() {
+  if (!validateRequired()) return;
+  saveLastTest();
+  loadLastTest();
+  recordEntry();
+  updateSummary();
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const W = 210, H = 297;
+  const ML = 18, MR = 18; // margins
+  const CW = W - ML - MR; // content width
+  let y = 0;
+
+  // Colors
+  const C = {
+    dark: [10, 15, 30],
+    surface: [17, 24, 39],
+    sterk: [13, 79, 71],
+    sterkLight: [26, 158, 142],
+    accent: [0, 229, 255],
+    purple: [199, 125, 255],
+    green: [105, 255, 71],
+    yellow: [255, 190, 11],
+    red: [255, 77, 109],
+    text: [232, 240, 254],
+    muted: [107, 127, 163],
+    white: [255, 255, 255],
+    black: [0, 0, 0],
+    grayBg: [245, 247, 250],
+    grayLine: [220, 225, 232],
+    grayText: [100, 110, 130],
+    darkText: [30, 35, 50],
+  };
+
+  function setC(c) { doc.setTextColor(c[0], c[1], c[2]); }
+  function setFC(c) { doc.setFillColor(c[0], c[1], c[2]); }
+  function setDC(c) { doc.setDrawColor(c[0], c[1], c[2]); }
+
+  // ── HEADER ──
+  setFC(C.sterk);
+  doc.rect(0, 0, W, 38, 'F');
+  setFC([10, 60, 54]);
+  doc.rect(0, 36, W, 2, 'F');
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(18);
+  setC(C.white);
+  doc.text('STERK', ML, 16);
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  setC([180, 220, 210]);
+  doc.text('HELSE & TRENING', ML, 22);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(14);
+  setC(C.white);
+  doc.text('Standard fysisk helseundersøkelse', W - MR, 16, { align: 'right' });
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  setC([180, 220, 210]);
+  doc.text('EGYM · Kondisjonstest · Grepsstyrke', W - MR, 22, { align: 'right' });
+
+  y = 46;
+
+  // ── PASIENTINFO ──
+  const testdato = v('p_testdato') || '—';
+  const fodselsdato = v('p_fodselsdato') || '—';
+  const kjonn = v('p_kjonn') ? ({ male: 'Mann', female: 'Kvinne', other: 'Annet' }[v('p_kjonn')] || '') : '—';
+  const age = calcAge(v('p_fodselsdato'));
+  const journal = v('p_journal');
+  const instruktor = v('p_instruktor');
+
+  // Section label
+  function sectionLabel(label, yPos) {
+    setFC(C.grayBg);
+    doc.rect(ML, yPos - 4, CW, 7, 'F');
+    setDC(C.grayLine);
+    doc.line(ML, yPos + 3, ML + CW, yPos + 3);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    setC(C.sterk);
+    doc.text(label, ML + 3, yPos + 1);
+    return yPos + 10;
+  }
+
+  function fieldRow(label, value, yPos, badge) {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    setC(C.grayText);
+    doc.text(label, ML + 2, yPos);
+    doc.setFont('helvetica', 'bold');
+    setC(C.darkText);
+    doc.text(String(value || '—'), ML + 58, yPos);
+    if (badge) {
+      const bColor = badge[0] === 'ref-green' ? C.green : badge[0] === 'ref-yellow' ? C.yellow : C.red;
+      const bTextColor = badge[0] === 'ref-yellow' ? [100, 80, 0] : badge[0] === 'ref-green' ? [0, 100, 30] : [160, 30, 50];
+      setFC(bColor);
+      const bx = ML + 58 + doc.getTextWidth(String(value || '—')) + 3;
+      doc.circle(bx + 1.5, yPos - 1.2, 1, 'F');
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(6.5);
+      setC(bTextColor);
+      doc.text(badge[1], bx + 4, yPos);
+    }
+    return yPos + 5;
+  }
+
+  y = sectionLabel('PASIENTINFORMASJON', y);
+  y = fieldRow('Testdato', testdato, y);
+  y = fieldRow('Fødselsdato', fodselsdato + (age ? ' (' + age + ' år)' : ''), y);
+  y = fieldRow('Kjønn', kjonn, y);
+  if (journal) y = fieldRow('Journal-ID', journal, y);
+  if (instruktor) y = fieldRow('Instruktør', instruktor, y);
+  y += 4;
+
+  // ── METABOLSK ──
+  const hasMeta = ['m_vekt', 'm_hoyde', 'm_bmi', 'm_midje', 'm_hofte', 'm_whr', 'm_fettpct', 'm_muskel', 'm_ffmi'].some(id => v(id));
+  if (hasMeta) {
+    y = sectionLabel('METABOLSK HELSE', y);
+    if (v('m_vekt')) y = fieldRow('Vekt', v('m_vekt') + ' kg', y);
+    if (v('m_hoyde')) y = fieldRow('Høyde', v('m_hoyde') + ' cm', y);
+    if (v('m_bmi')) y = fieldRow('BMI', v('m_bmi') + ' kg/m²', y, refBMI(n('m_bmi')));
+    if (v('m_midje')) y = fieldRow('Midjemål', v('m_midje') + ' cm', y);
+    if (v('m_hofte')) y = fieldRow('Hoftemål', v('m_hofte') + ' cm', y);
+    if (v('m_whr')) y = fieldRow('Midje-hofte-ratio', v('m_whr'), y, refWHR(n('m_whr'), v('p_kjonn')));
+    if (v('m_fettpct')) y = fieldRow('Fettprosent', v('m_fettpct') + ' %', y, refFett(n('m_fettpct'), v('p_kjonn'), age));
+    if (v('m_muskel')) y = fieldRow('Muskelmasse', v('m_muskel') + ' kg', y);
+    if (v('m_ffmi')) y = fieldRow('FFMI', v('m_ffmi') + ' kg/m²', y, refFFMI(n('m_ffmi'), v('p_kjonn')));
+    if (v('bio_meta')) y = fieldRow('BioAge metabolsk', v('bio_meta') + ' år', y);
+    y += 4;
+  }
+
+  // ── KONDISJON / HJERTE-KAR ──
+  const hasCardio = ['c_puls', 'c_sys', 'c_dia', 'c_vo2egym'].some(id => v(id));
+  if (hasCardio) {
+    y = sectionLabel('KONDISJON / HJERTE-KAR', y);
+    if (v('c_puls')) y = fieldRow('Hvilepuls', v('c_puls') + ' bpm', y, refPuls(n('c_puls')));
+    if (v('c_sys') && v('c_dia')) {
+      y = fieldRow('Blodtrykk', v('c_sys') + '/' + v('c_dia') + ' mmHg', y, refSys(n('c_sys')));
+    }
+    if (v('c_vo2egym')) y = fieldRow('VO2maks (EGYM)', v('c_vo2egym') + ' ml/kg/min', y);
+    if (v('bio_cardio')) y = fieldRow('BioAge kondisjon', v('bio_cardio') + ' år', y);
+    y += 4;
+  }
+
+  // ── STYRKE ──
+  const styrkeFields = [['Benkpress', 's_benkpress'], ['Sittende roing', 's_roing'], ['Skulderpress', 's_skulder'], ['Lat pulldown', 's_lat'], ['Beinpress', 's_beinpress'], ['Beinekstensjon', 's_beinekst'], ['Beinkurl', 's_beinkurl'], ['Magemaskin', 's_mage']];
+  const hasStyrke = styrkeFields.some(([, id]) => v(id));
+  if (hasStyrke) {
+    y = sectionLabel('STYRKE (EGYM)', y);
+    styrkeFields.forEach(([lbl, id]) => { if (v(id)) y = fieldRow(lbl, v(id) + ' kg', y); });
+    if (v('bio_styrke')) y = fieldRow('BioAge styrke', v('bio_styrke') + ' år', y);
+    y += 4;
+  }
+
+  // ── FLEKSIBILITET ──
+  const fleksFields = [['Nakke v/h', 'f_nakke_v', 'f_nakke_h', '°'], ['Hofte v/h', 'f_hofte_v', 'f_hofte_h', '°'], ['Hamstrings v/h', 'f_ham_v', 'f_ham_h', '°'], ['Lateral overkropp v/h', 'f_lat_v', 'f_lat_h', '°'], ['Bryst/skulder', 'f_bryst', null, '°'], ['Squat test', 'f_squat', null, '%']];
+  const hasFleks = fleksFields.some(([, id]) => v(id));
+  if (hasFleks) {
+    y = sectionLabel('FLEKSIBILITET (EGYM)', y);
+    fleksFields.forEach(([lbl, id1, id2, unit]) => {
+      const a = v(id1), b = id2 ? v(id2) : null;
+      if (a || b) y = fieldRow(lbl, (a || '—') + (b ? ' / ' + b : '') + ' ' + unit, y);
+    });
+    if (v('bio_fleks')) y = fieldRow('BioAge fleksibilitet', v('bio_fleks') + ' år', y);
+    y += 4;
+  }
+
+  // ── GREPSSTYRKE ──
+  const hasGrip = ['g_h1', 'g_h2', 'g_h3', 'g_v1', 'g_v2', 'g_v3'].some(id => v(id));
+  if (hasGrip) {
+    y = sectionLabel('GREPSSTYRKE', y);
+    if (v('g_best_h')) y = fieldRow('Beste høyre', v('g_best_h') + ' kg', y, refGrip(parseFloat(v('g_best_h')), v('p_kjonn'), age));
+    if (v('g_best_v')) y = fieldRow('Beste venstre', v('g_best_v') + ' kg', y, refGrip(parseFloat(v('g_best_v')), v('p_kjonn'), age));
+    if (v('g_max')) y = fieldRow('Maks grepsstyrke', v('g_max') + ' kg', y, refGrip(parseFloat(v('g_max')), v('p_kjonn'), age));
+    // Details
+    doc.setFontSize(6.5);
+    doc.setFont('helvetica', 'normal');
+    setC(C.grayText);
+    const details = [];
+    if (v('g_h1')) details.push('H1: ' + v('g_h1'));
+    if (v('g_h2')) details.push('H2: ' + v('g_h2'));
+    if (v('g_h3')) details.push('H3: ' + v('g_h3'));
+    if (v('g_v1')) details.push('V1: ' + v('g_v1'));
+    if (v('g_v2')) details.push('V2: ' + v('g_v2'));
+    if (v('g_v3')) details.push('V3: ' + v('g_v3'));
+    if (details.length > 0) {
+      doc.text('Forsøk: ' + details.join(' · ') + ' kg', ML + 2, y);
+      y += 4;
+    }
+    y += 4;
+  }
+
+  // ── Page break check ──
+  if (y > 200) {
+    doc.addPage();
+    y = 20;
+  }
+
+  // ── KONDISJONSTEST VO2MAKS ──
+  y = sectionLabel('KONDISJONSTEST — VO2MAKS', y);
+  if (bruceVo2 !== null) {
+    // Large VO2 display
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(36);
+    setC(C.sterk);
+    doc.text(String(bruceVo2), ML + 2, y + 10);
+    doc.setFontSize(9);
+    setC(C.grayText);
+    doc.text('ml/kg/min', ML + 2 + doc.getTextWidth(String(bruceVo2)) * (36/9) * 0.28 + 4, y + 10);
+
+    // Category badge
+    const cat = bruceCategory;
+    const catColor = cat === 'Svært lav' || cat === 'Lav' ? C.red : cat === 'Moderat' ? C.yellow : C.green;
+    setFC(catColor);
+    const catX = W - MR - doc.getTextWidth(cat) - 10;
+    doc.roundedRect(catX - 2, y + 2, doc.getTextWidth(cat) + 12, 7, 2, 2, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    setC(C.white);
+    doc.text(cat, catX + 4, y + 7.2);
+
+    y += 16;
+    y = fieldRow('Protokoll', v('res-protocol'), y);
+    y = fieldRow(currentMode === 'cycle' ? 'Belastning' : 'Testtid', v('res-time'), y);
+    const hfVal = v('res-hfmax');
+    if (hfVal && hfVal !== '—') y = fieldRow('HF', hfVal, y);
+    y = fieldRow('ACSM-kategori', bruceCategory, y);
+  } else {
+    y = fieldRow('Status', 'Ikke utført', y);
+  }
+  y += 4;
+
+  // ── EGYM BIOAGE SUMMARY ──
+  const egymBio = g('egym_total_val').textContent;
+  if (egymBio !== '—') {
+    if (y > 240) { doc.addPage(); y = 20; }
+    y = sectionLabel('SAMLET HELSESCORE', y);
+
+    // Summary boxes
+    const boxW = (CW - 8) / 3;
+    const boxes = [
+      { label: 'EGYM BioAge', value: egymBio + ' år', color: C.sterk },
+      { label: 'VO2maks', value: bruceVo2 ? bruceVo2 + ' ml/kg/min' : '—', color: C.sterk },
+      { label: 'Kronologisk alder', value: age ? age + ' år' : '—', color: C.grayText },
+    ];
+    boxes.forEach((box, i) => {
+      const bx = ML + i * (boxW + 4);
+      setFC(C.grayBg);
+      setDC(C.grayLine);
+      doc.roundedRect(bx, y, boxW, 18, 2, 2, 'FD');
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(6);
+      setC(C.grayText);
+      doc.text(box.label, bx + boxW / 2, y + 5, { align: 'center' });
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      setC(box.color);
+      doc.text(box.value, bx + boxW / 2, y + 14, { align: 'center' });
+    });
+    y += 24;
+
+    // Delta
+    if (age) {
+      const diff = parseInt(egymBio) - age;
+      let deltaText, deltaColor;
+      if (diff < 0) { deltaText = Math.abs(diff) + ' år yngre biologisk'; deltaColor = C.green; }
+      else if (diff > 0) { deltaText = diff + ' år eldre biologisk'; deltaColor = C.red; }
+      else { deltaText = 'Tilsvarer kronologisk alder'; deltaColor = C.sterk; }
+      setFC([245, 248, 240]);
+      doc.roundedRect(ML, y, CW, 8, 2, 2, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      setC(deltaColor);
+      doc.text(deltaText, W / 2, y + 5.5, { align: 'center' });
+      y += 12;
+    }
+  }
+
+  // ── KOMMENTAR ──
+  const komm = v('kommentar');
+  if (komm) {
+    if (y > 250) { doc.addPage(); y = 20; }
+    y = sectionLabel('KOMMENTAR', y);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    setC(C.darkText);
+    const lines = doc.splitTextToSize(komm, CW - 4);
+    doc.text(lines, ML + 2, y);
+    y += lines.length * 4 + 4;
+  }
+
+  // ── FOOTER ──
+  const footerY = H - 12;
+  setDC(C.grayLine);
+  doc.line(ML, footerY - 4, ML + CW, footerY - 4);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(6);
+  setC(C.grayText);
+  doc.text('Registrert via Sterk Helse & Trening — Standard fysisk helseundersøkelse', ML, footerY);
+  doc.text('Generert: ' + new Date().toLocaleDateString('nb-NO') + ' ' + new Date().toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' }), W - MR, footerY, { align: 'right' });
+  doc.text('Dokument for opplasting i Pasientsky. Ingen data er lagret eksternt.', ML, footerY + 3.5);
+
+  // ── SAVE ──
+  const filename = 'helseundersokelse_' + (v('p_testdato') || 'sterk') + '.pdf';
+  doc.save(filename);
+  setToast('PDF generert og lastet ned — klar for opplasting i Pasientsky');
+}
+
+// ─── HISTORY (localStorage) ──────────────────────────
+const HIST_KEY = 'sterk_history';
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem(HIST_KEY) || '[]'); } catch(e) { return []; }
+}
+function saveHistory(arr) {
+  try { localStorage.setItem(HIST_KEY, JSON.stringify(arr.slice(-20))); } catch(e) {}
+}
+function recordEntry() {
+  const entry = {
+    date: v('p_testdato') || new Date().toISOString().split('T')[0],
+    bioage: g('egym_total_val').textContent !== '—' ? g('egym_total_val').textContent : null,
+    vo2: bruceVo2,
+    bmi: v('m_bmi') || null,
+    bt: (v('c_sys') && v('c_dia')) ? v('c_sys') + '/' + v('c_dia') : null,
+    grip: v('g_max') || null,
+    age: calcAge(v('p_fodselsdato'))
+  };
+  const hist = loadHistory();
+  const idx = hist.findIndex(h => h.date === entry.date);
+  if (idx >= 0) hist[idx] = entry; else hist.push(entry);
+  hist.sort((a, b) => a.date.localeCompare(b.date));
+  saveHistory(hist);
+  renderHistory();
+}
+function renderHistory() {
+  const hist = loadHistory();
+  const empty = g('history-empty');
+  const table = g('history-table');
+  const tbody = g('history-rows');
+  if (!hist.length) {
+    empty.style.display = '';
+    table.style.display = 'none';
+    return;
+  }
+  empty.style.display = 'none';
+  table.style.display = '';
+  tbody.innerHTML = '';
+  [...hist].reverse().forEach((h, i) => {
+    const prev = hist[hist.length - 2 - i];
+    let deltaTxt = '—', deltaClass = 'hist-delta-neu';
+    if (h.bioage && h.age) {
+      const diff = parseInt(h.bioage) - h.age;
+      if (diff < 0) { deltaTxt = diff + ' år'; deltaClass = 'hist-delta-pos'; }
+      else if (diff > 0) { deltaTxt = '+' + diff + ' år'; deltaClass = 'hist-delta-neg'; }
+      else deltaTxt = '±0';
+    }
+    const dateStr = new Date(h.date).toLocaleDateString('nb-NO');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${dateStr}</td>
+      <td>${h.bioage ? h.bioage + ' år' : '—'}</td>
+      <td>${h.vo2 ? h.vo2 + ' ml/kg/min' : '—'}</td>
+      <td>${h.bmi || '—'}</td>
+      <td>${h.bt || '—'}</td>
+      <td>${h.grip ? h.grip + ' kg' : '—'}</td>
+      <td class="${deltaClass}">${deltaTxt}</td>
+      <td><button class="hist-load-btn" onclick="loadHistEntry(${hist.length - 1 - i})">Last</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+function loadHistEntry(idx) {
+  const hist = loadHistory();
+  const h = hist[idx];
+  if (!h) return;
+  if (h.date) setv('p_testdato', h.date);
+  if (h.bmi) setv('m_bmi', h.bmi);
+  if (h.bt) {
+    const parts = h.bt.split('/');
+    if (parts.length === 2) { setv('c_sys', parts[0]); setv('c_dia', parts[1]); }
+  }
+  setToast('Historikkoppføring lastet — fyll inn øvrige verdier');
+  updateAllRefs();
+  updateSummary();
+}
+function clearHistory() {
+  if (!confirm('Slett all testhistorikk på denne enheten?')) return;
+  try { localStorage.removeItem(HIST_KEY); } catch(e) {}
+  renderHistory();
+  setToast('Historikk slettet');
+}
+
+// ─── EXPORT / JOURNAL ────────────────────────────────
+function buildJournalText() {
+  const lines = [];
+  const testdato = v('p_testdato') || 'ukjent dato';
+  const fodselsdato = v('p_fodselsdato') || '—';
+  const kjonn = v('p_kjonn') ? ({'male':'Mann','female':'Kvinne','other':'Annet'}[v('p_kjonn')] || '') : '—';
+  const jnr = v('p_journal') ? ' | Journal: ' + v('p_journal') : '';
+  const instruktor = v('p_instruktor') ? ' | Instruktør: ' + v('p_instruktor') : '';
+  const age = calcAge(v('p_fodselsdato'));
+
+  lines.push('══════════════════════════════════════════');
+  lines.push('  STANDARD FYSISK HELSEUNDERSØKELSE');
+  lines.push('  Sterk Helse & Trening');
+  lines.push('══════════════════════════════════════════');
+  lines.push('Testdato:     ' + testdato + instruktor);
+  lines.push('Pasient:      Fødselsdato ' + fodselsdato + ', ' + kjonn + (age ? ', ' + age + ' år' : '') + jnr);
+  lines.push('');
+
+  const egymBio = g('egym_total_val').textContent;
+  if (egymBio !== '—') {
+    lines.push('EGYM SAMLET BIOAGE:  ' + egymBio + ' år');
+    if (age) {
+      const diff = parseInt(egymBio) - age;
+      if (diff < 0) lines.push('  → ' + Math.abs(diff) + ' år biologisk yngre enn kronologisk alder');
+      else if (diff > 0) lines.push('  → ' + diff + ' år biologisk eldre enn kronologisk alder');
+      else lines.push('  → Tilsvarer kronologisk alder');
+    }
+    lines.push('');
+  }
+
+  lines.push('──────────────────────────────────────────');
+  lines.push('  DEL 1 — EGYM');
+  lines.push('──────────────────────────────────────────');
+
+  const styrke = [['Benkpress','s_benkpress'],['Sittende roing','s_roing'],['Skulderpress','s_skulder'],['Lat pulldown','s_lat'],['Beinpress','s_beinpress'],['Beinekstensjon','s_beinekst'],['Beinkurl','s_beinkurl'],['Magemaskin','s_mage']];
+  const hasSt = styrke.some(([,id]) => v(id));
+  if (hasSt || v('bio_styrke')) {
+    lines.push('STYRKE:');
+    styrke.forEach(([lbl, id]) => { if (v(id)) lines.push('  ' + lbl.padEnd(20) + v(id) + ' kg'); });
+    if (v('bio_styrke')) lines.push('  BioAge styrke:       ' + v('bio_styrke') + ' år');
+    lines.push('');
+  }
+
+  const fleks = [['Nakke v/h','f_nakke_v','f_nakke_h','°'],['Hofte v/h','f_hofte_v','f_hofte_h','°'],['Hamstrings v/h','f_ham_v','f_ham_h','°'],['Lateral overkropp v/h','f_lat_v','f_lat_h','°'],['Bryst/skulder','f_bryst',null,'°'],['Squat test','f_squat',null,'%']];
+  const hasF = fleks.some(([,id1]) => v(id1));
+  if (hasF || v('bio_fleks')) {
+    lines.push('FLEKSIBILITET:');
+    fleks.forEach(([lbl, id1, id2, unit]) => {
+      const a = v(id1), b = id2 ? v(id2) : null;
+      if (a || b) lines.push('  ' + lbl.padEnd(24) + (a||'—') + (b ? ' / ' + b : '') + ' ' + unit);
+    });
+    if (v('bio_fleks')) lines.push('  BioAge fleksibilitet: ' + v('bio_fleks') + ' år');
+    lines.push('');
+  }
+
+  const hasMeta = ['m_vekt','m_hoyde','m_bmi','m_midje','m_hofte','m_whr','m_fettpct','m_muskel','m_ffmi'].some(id => v(id));
+  if (hasMeta || v('bio_meta')) {
+    lines.push('METABOLSK:');
+    if (v('m_vekt')) lines.push('  Vekt:                ' + v('m_vekt') + ' kg');
+    if (v('m_hoyde')) lines.push('  Høyde:               ' + v('m_hoyde') + ' cm');
+    if (v('m_bmi')) lines.push('  BMI:                 ' + v('m_bmi') + ' kg/m²' + (refBMI(n('m_bmi')) ? '  [' + refBMI(n('m_bmi'))[1] + ']' : ''));
+    if (v('m_midje')) lines.push('  Midjemål:            ' + v('m_midje') + ' cm');
+    if (v('m_hofte')) lines.push('  Hoftemål:            ' + v('m_hofte') + ' cm');
+    if (v('m_whr')) lines.push('  Midje-hofte-ratio:   ' + v('m_whr') + (refWHR(n('m_whr'), v('p_kjonn')) ? '  [' + refWHR(n('m_whr'), v('p_kjonn'))[1] + ']' : ''));
+    if (v('m_fettpct')) lines.push('  Fettprosent:         ' + v('m_fettpct') + ' %' + (refFett(n('m_fettpct'), v('p_kjonn'), calcAge(v('p_fodselsdato'))) ? '  [' + refFett(n('m_fettpct'), v('p_kjonn'), calcAge(v('p_fodselsdato')))[1] + ']' : ''));
+    if (v('m_muskel')) lines.push('  Muskelmasse:         ' + v('m_muskel') + ' kg');
+    if (v('m_ffmi')) lines.push('  FFMI:                ' + v('m_ffmi') + ' kg/m²');
+    if (v('bio_meta')) lines.push('  BioAge metabolsk:    ' + v('bio_meta') + ' år');
+    lines.push('');
+  }
+
+  const hasCardio = ['c_puls','c_sys','c_dia','c_vo2egym'].some(id => v(id));
+  if (hasCardio || v('bio_cardio')) {
+    lines.push('KONDISJON / HJERTE-KAR:');
+    if (v('c_puls')) lines.push('  Hvilepuls:           ' + v('c_puls') + ' bpm' + (refPuls(n('c_puls')) ? '  [' + refPuls(n('c_puls'))[1] + ']' : ''));
+    if (v('c_sys') && v('c_dia')) lines.push('  Blodtrykk:           ' + v('c_sys') + '/' + v('c_dia') + ' mmHg' + (refSys(n('c_sys')) ? '  [Sys: ' + refSys(n('c_sys'))[1] + ']' : ''));
+    if (v('c_vo2egym')) lines.push('  VO₂maks (EGYM):      ' + v('c_vo2egym') + ' ml/kg/min');
+    if (v('bio_cardio')) lines.push('  BioAge kondisjon:    ' + v('bio_cardio') + ' år');
+    lines.push('');
+  }
+
+  const hasGrip = ['g_h1','g_h2','g_h3','g_v1','g_v2','g_v3'].some(id => v(id));
+  if (hasGrip) {
+    const gender = v('p_kjonn') || 'male';
+    const age = calcAge(v('p_fodselsdato'));
+    lines.push('GREPSSTYRKE:');
+    const bestH = v('g_best_h'), bestV = v('g_best_v'), maxG = v('g_max');
+    if (v('g_h1')) lines.push('  Høyre forsøk 1:      ' + v('g_h1') + ' kg');
+    if (v('g_h2')) lines.push('  Høyre forsøk 2:      ' + v('g_h2') + ' kg');
+    if (v('g_h3')) lines.push('  Høyre forsøk 3:      ' + v('g_h3') + ' kg');
+    if (v('g_v1')) lines.push('  Venstre forsøk 1:    ' + v('g_v1') + ' kg');
+    if (v('g_v2')) lines.push('  Venstre forsøk 2:    ' + v('g_v2') + ' kg');
+    if (v('g_v3')) lines.push('  Venstre forsøk 3:    ' + v('g_v3') + ' kg');
+    if (bestH) lines.push('  Beste høyre:         ' + bestH + ' kg');
+    if (bestV) lines.push('  Beste venstre:       ' + bestV + ' kg');
+    if (maxG) {
+      const gripRef = refGrip(parseFloat(maxG), gender, age);
+      lines.push('  Maks grepsstyrke:    ' + maxG + ' kg' + (gripRef ? '  [' + gripRef[1] + ']' : ''));
+    }
+    lines.push('');
+  }
+
+  lines.push('──────────────────────────────────────────');
+  lines.push('  DEL 2 — KONDISJONSTEST VO₂MAKS');
+  lines.push('──────────────────────────────────────────');
+  if (bruceVo2 !== null) {
+    lines.push('  VO₂maks:             ' + bruceVo2 + ' ml/kg/min');
+    lines.push('  Protokoll:           ' + v('res-protocol'));
+    lines.push('  ' + (currentMode === 'cycle' ? 'Belastning:' : 'Testtid:') + '            ' + v('res-time'));
+    const hfVal = v('res-hfmax');
+    if (hfVal && hfVal !== '—') lines.push('  HF:                  ' + hfVal);
+    lines.push('  ACSM-kategori:       ' + bruceCategory);
+  } else {
+    lines.push('  Kondisjonstest ikke utført / ikke registrert.');
+  }
+  lines.push('');
+
+  const komm = v('kommentar');
+  if (komm) {
+    lines.push('──────────────────────────────────────────');
+    lines.push('  KOMMENTAR');
+    lines.push('──────────────────────────────────────────');
+    lines.push(komm);
+    lines.push('');
+  }
+
+  lines.push('══════════════════════════════════════════');
+  lines.push('  Registrert via Sterk HT — EGYM-skjema');
+  lines.push('  Lim inn i Pasientsky under helsenotat.');
+  lines.push('══════════════════════════════════════════');
+
+  return lines.join('\n');
+}
+
+function genExport() {
+  if (!validateRequired()) return;
+  saveLastTest();
+  loadLastTest();
+  recordEntry();
+  updateSummary();
+  const txt = buildJournalText();
+  g('export-content').textContent = txt;
+  g('export-preview').classList.add('show');
+  setToast('Journaltekst generert — klar til kopiering');
+}
+
+function copyJournal() {
+  genExport();
+  const txt = g('export-content').textContent;
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(txt).then(() => {
+      setToast('✓ Kopiert! Åpne Pasientsky og lim inn.');
+    }).catch(() => { fallbackCopy(txt); });
+  } else {
+    fallbackCopy(txt);
+  }
+}
+function fallbackCopy(txt) {
+  const ta = document.createElement('textarea');
+  ta.value = txt;
+  ta.setAttribute('readonly', '');
+  ta.style.cssText = 'position:fixed;top:50%;left:50%;width:1px;height:1px;opacity:0;font-size:16px;z-index:9999;';
+  document.body.appendChild(ta);
+  // iOS/iPadOS requires special range selection
+  if (navigator.userAgent.match(/ipad|iphone/i)) {
+    const range = document.createRange();
+    range.selectNodeContents(ta);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    ta.setSelectionRange(0, 999999);
+  } else {
+    ta.focus();
+    ta.setSelectionRange(0, 999999);
+  }
+  try {
+    document.execCommand('copy');
+    setToast('✓ Kopiert! Åpne Pasientsky og lim inn.');
+  } catch(e) {
+    setToast('Hold inne teksten i boksen → Velg alt → Kopier');
+  }
+  document.body.removeChild(ta);
+}
+
+function downloadTxt() {
+  const txt = g('export-content').textContent || buildJournalText();
+  const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'helseundersokelse_' + (v('p_testdato') || 'sterk') + '.txt';
+  a.click();
+}
+
+function openEmailModal() {
+  genExport();
+  g('email-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.body.style.position = 'fixed';
+  document.body.style.width = '100%';
+  document.body.dataset.scrollY = window.scrollY;
+  document.body.style.top = '-' + window.scrollY + 'px';
+}
+function closeEmailModal() {
+  g('email-modal').classList.remove('open');
+  document.body.style.overflow = '';
+  document.body.style.position = '';
+  document.body.style.width = '';
+  document.body.style.top = '';
+  window.scrollTo(0, parseInt(document.body.dataset.scrollY || '0'));
+}
+
+function sendEmail() {
+  const to = v('email-to');
+  const subject = encodeURIComponent('Standard fysisk helseundersøkelse — ' + (v('p_testdato') || 'Sterk HT'));
+  const body = encodeURIComponent(buildJournalText());
+  window.location.href = 'mailto:' + to + '?subject=' + subject + '&body=' + body;
+  closeEmailModal();
+  setToast('E-postklient åpnet — send for å levere til instruktør');
+}
+
+function setToast(msg) {
+  g('status-toast').textContent = msg;
+  setTimeout(() => { g('status-toast').textContent = ''; }, 6000);
+}
+
+// ─── THEME TOGGLE ────────────────────────────────────
+function toggleTheme() {
+  const isLight = document.body.classList.toggle('light-theme');
+  const btn = g('theme-btn');
+  btn.textContent = isLight ? '☾ Mørkt tema' : '☀ Lyst tema';
+  try { localStorage.setItem('sterk_theme', isLight ? 'light' : 'dark'); } catch(e) {}
+}
+
+// ─── STEP PROGRESS ───────────────────────────────────
+const SECTIONS = ['pasient','egym','bruce','summary','export'];
+function updateSteps() {
+  const scrollY = window.scrollY + 160;
+  let current = 0;
+  SECTIONS.forEach((id, i) => {
+    const el = g(id);
+    if (el && el.getBoundingClientRect().top + window.scrollY <= scrollY) current = i;
+  });
+  for (let i = 1; i <= 5; i++) {
+    const step = g('step-' + i);
+    if (!step) continue;
+    step.classList.remove('active', 'done');
+    if (i - 1 < current) step.classList.add('done');
+    else if (i - 1 === current) step.classList.add('active');
+    const line = g('line-' + i);
+    if (line) line.classList.toggle('done', i - 1 < current);
+  }
+}
+function scrollToSection(id) {
+  const el = g(id);
+  if (el) {
+    const y = el.getBoundingClientRect().top + window.scrollY - 20;
+    window.scrollTo({ top: y, behavior: 'smooth' });
+  }
+}
+
+// ─── VALIDATION ──────────────────────────────────────
+function validateRequired() {
+  let ok = true;
+  const checks = [
+    { wrap: 'req-fodselsdato', field: 'p_fodselsdato' },
+    { wrap: 'req-testdato',    field: 'p_testdato'    }
+  ];
+  checks.forEach(({ wrap, field }) => {
+    const invalid = !v(field);
+    const el = g(wrap);
+    if (el) el.classList.toggle('invalid', invalid);
+    if (invalid) ok = false;
+  });
+  g('validate-banner').classList.toggle('show', !ok);
+  if (!ok) scrollToSection('pasient');
+  return ok;
+}
+
+// ─── LAST TEST (localStorage) ────────────────────────
+function saveLastTest() {
+  try {
+    const today = v('p_testdato') || new Date().toISOString().split('T')[0];
+    localStorage.setItem('sterk_last_test', today);
+  } catch(e) {}
+}
+function loadLastTest() {
+  try {
+    const last = localStorage.getItem('sterk_last_test');
+    if (!last) return;
+    const lastDate = new Date(last);
+    const now = new Date();
+    const days = Math.round((now - lastDate) / 86400000);
+    const row = g('last-test-row');
+    if (row) {
+      row.style.display = 'flex';
+      g('last-test-date').textContent = lastDate.toLocaleDateString('nb-NO');
+      g('last-test-days').textContent = days === 0 ? '— i dag' : '— ' + days + ' dager siden';
+    }
+  } catch(e) {}
+}
+
+// ─── INIT ────────────────────────────────────────────
+document.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === 'Go') && currentMode === 'treadmill') calculateBruce(); else if ((e.key === 'Enter' || e.key === 'Go') && currentMode === 'cycle') calculateAstrand(); });
+window.addEventListener('scroll', updateSteps, { passive: true });
+// Prevent pull-to-refresh on iPadOS when inside form
+document.addEventListener('touchmove', function(e) {}, { passive: true });
+g('p_testdato').value = new Date().toISOString().split('T')[0];
+g('p_fodselsdato').addEventListener('change', () => {
+  g('req-fodselsdato').classList.remove('invalid');
+  g('validate-banner').classList.remove('show');
+  updateAllRefs();
+  updateSummary();
+  syncDemographics();
+});
+g('p_testdato').addEventListener('change', () => {
+  g('req-testdato').classList.remove('invalid');
+  g('validate-banner').classList.remove('show');
+});
+g('p_kjonn').addEventListener('change', () => { updateAllRefs(); updateSummary(); syncDemographics(); });
+// Auto-fill Åstrand weight when metabolic weight changes
+g('m_vekt').addEventListener('input', () => { if (v('m_vekt')) setv('a_vekt', v('m_vekt')); });
+if (g('res-hf-tile')) g('res-hf-tile').style.display = 'none';
+loadLastTest();
+renderHistory();
+try {
+  if (localStorage.getItem('sterk_theme') === 'light') {
+    document.body.classList.add('light-theme');
+    g('theme-btn').textContent = '☾ Mørkt tema';
+  }
+} catch(e) {}
+updateSteps();
+
+// ─── PWA SERVICE WORKER ──────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+
+</script>
+</body>
+</html>
